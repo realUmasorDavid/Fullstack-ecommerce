@@ -95,9 +95,15 @@ def signup(request):
         username = request.POST['username']
         email = request.POST['email']
         password1 = request.POST['password1']
+        phone_number = request.POST['phone']
         if password1:
             user = User.objects.create_user(username, email, password1)
             user.save()
+            
+            user_profile, created = Profile.objects.get_or_create(user=user)
+            user_profile.phone_number = phone_number
+            user_profile.save()
+
             return redirect('login')
         return render(request, 'signup.html', {'success': 'Account created successfully'})
     return render(request, 'signup.html')
