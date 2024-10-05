@@ -1,5 +1,6 @@
 # models.py
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User, AbstractUser, Group, Permission
 
 class CustomUser(AbstractUser):
@@ -58,7 +59,7 @@ class CartItem(models.Model):
 
 class Cart(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     items = models.ManyToManyField(CartItem, blank=True)
     status = models.CharField(max_length=50, default="pending", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -90,7 +91,7 @@ class Payment(models.Model):
     
 class Order(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, blank=True, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, blank=True, null=True)
     delivered = models.BooleanField(default=None, blank=True, null=True)
@@ -103,7 +104,7 @@ class Order(models.Model):
 
 class OrderHistory(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     items = models.ManyToManyField(CartItem)
     reference = models.CharField(max_length=255, null=True, blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
