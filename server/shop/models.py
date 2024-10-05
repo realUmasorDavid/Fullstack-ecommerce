@@ -1,32 +1,24 @@
 # models.py
 from django.db import models
-from django.conf import settings
-from django.contrib.auth.models import User, AbstractUser, Group, Permission
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-class CustomUser(AbstractUser):
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
 
-    # Add unique related_name for groups and user_permissions
-    groups = models.ManyToManyField(
-        Group,
-        verbose_name='groups',
-        blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        related_name='customuser_set',  # Unique related_name
-        related_query_name='customuser'
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        verbose_name='user permissions',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        related_name='customuser_set',  # Unique related_name
-        related_query_name='customuser'
-    )
-
     def __str__(self):
-        return self.username
+        return self.user.username
+    
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
 
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.profile.save()
 
 class Category(models.Model):
     name = models.CharField(max_length=55)
@@ -59,7 +51,7 @@ class CartItem(models.Model):
 
 class Cart(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(CartItem, blank=True)
     status = models.CharField(max_length=50, default="pending", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -77,7 +69,7 @@ class Cart(models.Model):
 
 class Payment(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.IntegerField()
     email = models.EmailField()
     reference = models.CharField(max_length=255)
@@ -91,7 +83,7 @@ class Payment(models.Model):
     
 class Order(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, blank=True, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, blank=True, null=True)
     delivered = models.BooleanField(default=None, blank=True, null=True)
@@ -104,7 +96,7 @@ class Order(models.Model):
 
 class OrderHistory(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(CartItem)
     reference = models.CharField(max_length=255, null=True, blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -115,3 +107,10 @@ class OrderHistory(models.Model):
 
     def __str__(self):
         return f"Order {self.id} by {self.user.username}"
+    
+    @property
+    def phone_number(self):
+        try:
+            return self.user.profile.phone_number
+        except Profile.DoesNotExist:
+            return None
