@@ -1,9 +1,11 @@
 # views.py
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
+from django.contrib.auth import get_user_model
 from django.contrib import messages
 from .models import *
 import json
@@ -66,20 +68,37 @@ def store(request):
 
 @login_required
 def profile(request):
-    return render(request, 'profile.html', {})
+    user = request.user
+
+    if request.method == 'POST':
+        user.first_name = request.POST['first_name']
+        user.last_name = request.POST['last_name']
+        user.phone_number = request.POST['phone_number']
+        user.save()
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('update_profile')  # Redirect to the same page to display the updated profile
+
+    return render(request, 'update_profile.html', {'user': user})
 
 @login_required
 def checkout(request):
     return render(request, 'checkout.html', {})
 
 def signup(request):
+    User = get_user_model()
+    
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
+        phone_number = request.POST['phone']
         password1 = request.POST['password1']
-        password2 = request.POST['password2']
-        if password1 == password2:
-            user = User.objects.create_user(username, email, password1)
+        if password1:
+            user = User.objects.create(
+            username=username,
+            email=email,
+            phone_number=phone_number,
+            password=make_password(password1)  # Hash the password
+        )
             user.save()
             return redirect('login')
         return render(request, 'signup.html', {'success': 'Account created successfully'})

@@ -149,68 +149,46 @@
             <div class="">
                 <h2></h2>
                 <h2 class="text-2xl font-bold">{{user.username}}</h2>
-                <h2>Johndoe@gmail.com</h2>
+                <h2>{{user.email}}</h2>
             </div>
         </div>
         <div class="">
             <h1 class="text-2xl mt-0 mb-2">Profile Info</h1>
-            <div class="name flex mb-2">
-                <div class="flex flex-col me-8">
-                    <label for="first_name">First Name</label>
-                    <input type="text" name="first_name" class="p-2 bg-gray-200 rounded-lg text-white"
-                        placeholder="John" disabled>
-                </div>
-                <div class="flex flex-col ">
-                    <label for="last_name">Last Name</label>
-                    <input type="text" name="last_name" class="p-2 bg-gray-200 rounded-lg text-white" placeholder="Doe"
-                        disabled>
-                </div>
-
+    <form method="POST">
+        {% csrf_token %}
+        <div class="name flex mb-2">
+            <div class="flex flex-col me-8">
+                <label for="first_name">First Name</label>
+                <input type="text" name="first_name" class="p-2 bg-gray-200 rounded-lg text-black"
+                       placeholder="John" value="{{ user.first_name }}">
             </div>
-            <div class="w-9/12 space-x-9 flex mb-2">
-                <div class="w-[13.5rem]">
-                    <label for="gender">Gender</label>
-                    <select id="select-country-input-3"
-                        class="p-2 block w-full rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500">
-                        <optgroup label="Gender">
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="GA">Gay</option>
-                        <option value="LE">Lesbian</option>
-                        <option value="Bi">Bi-Sexual</option>
-                        <option value="dead">Kingsley</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div class="flex flex-col w-[13.5rem]">
-                    <label for="">Birth Date</label>
-                    <input
-                        class="block rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500"
-                        type="date" name="" id="">
-                </div>
+            <div class="flex flex-col ">
+                <label for="last_name">Last Name</label>
+                <input type="text" name="last_name" class="p-2 bg-gray-200 rounded-lg text-black" placeholder="Doe"
+                       value="{{ user.last_name }}">
             </div>
-            <div class="w-[29.25rem]">
-                <label for="phone-input-3" class="mb-2 block text-sm font-medium text-gray-900"> Phone
-                    Number
-                </label>
-                <div class="flex items-center">
-                    <button id="dropdown-phone-button-3" data-dropdown-toggle="dropdown-phone-3"
+        </div>
+        <div class="w-[29.25rem]">
+            <label for="phone-input-3" class="mb-2 block text-sm font-medium text-gray-900"> Phone
+                Number
+            </label>
+            <div class="flex items-center">
+                <button id="dropdown-phone-button-3" data-dropdown-toggle="dropdown-phone-3"
                         class="z-10 inline-flex shrink-0 items-center rounded-s-lg border border-gray-300 bg-gray-100 px-4 py-2.5 text-center text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100"
                         type="button">
-
-                        +234
-
-                    </button>
-                    <div class="relative w-full">
-                        <input type="text" id="phone-input"
-                            class="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500"
-                            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="812-345-6789" required />
-                    </div>
+                    +234
+                </button>
+                <div class="relative w-full">
+                    <input id="phone-input" name="phone_number"
+                           class="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500"
+                           value="{{ user.phone_number }}">
                 </div>
             </div>
-            <div class="save mt-5">
-                <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg">Save Profile</button>
-            </div>
+        </div>
+        <div class="save mt-5">
+            <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg">Save Profile</button>
+        </div>
+    </form>
         </div>
     </div>
 
