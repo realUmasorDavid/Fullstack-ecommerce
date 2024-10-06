@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <title>Marrigold</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -27,31 +28,27 @@
 
 <body class="font-Poppins overflow-x-hidden">
     <nav class="flex justify-between p-2 md:p-6 shadow">
-        <h1 class="font-semibold text-xl py-2.5">Marrigold.</h1>
-            <div class="links py-2.5">
-                <ul class="hidden lg:flex space-x-12">
-                    <a href="/" class="group transition duration-300">
-                        Home
-                        <span
-                            class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary"></span>
-                    </a>
-                    <a href="#" class="group transition duration-300">
-                        About
-                        <span
-                            class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary"></span>
-                    </a>
-                    <a href="/store" class="group transition duration-300">
-                        Order
-                        <span
-                            class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary"></span>
-                    </a>
-                    <a href="#" class="group transition duration-300">
-                        Contact
-                        <span
-                            class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary"></span>
-                    </a>
-                </ul>
-            </div>
+        <h1 class="font-semibold text-xl py-2.5 ml-2 md:ml-0">Marrigold.</h1>
+        <div class="links py-2.5">
+            <ul class="hidden lg:flex space-x-12">
+                <a href="/" class="group transition duration-300">
+                    Home
+                    <span class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary"></span>
+                </a>
+                <a href="#" class="group transition duration-300">
+                    About
+                    <span class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary"></span>
+                </a>
+                <a href="/store" class="group transition duration-300">
+                    Order
+                    <span class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary"></span>
+                </a>
+                <a href="#" class="group transition duration-300">
+                    Contact
+                    <span class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary"></span>
+                </a>
+            </ul>
+        </div>
             <div class="social hidden lg:flex space-x-2">
     
                 <a class="hover:bg-primary hover:text-white rounded-lg px-2.5 py-2.5 duration-200" href="">
@@ -96,7 +93,28 @@
                     </svg>
                 </a>
             </div>
+            <button id="hamburger" class="lg:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
     </nav>
+
+    <div id="mobile-menu" class="fixed z-10 top-0 right-0 h-full w-full bg-primary shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <button id="close-menu" class="absolute top-4 right-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <ul class="flex flex-col text-lg justify-center items-center space-y-16 p-4 flex-grow text-white">
+            <li><a href="/" class="group transition duration-300">Home</a></li>
+            <li><a href="#" class="group transition duration-300">About</a></li>
+            <li><a href="/store" class="group transition duration-300">Order</a></li>
+            <li><a href="#" class="group transition duration-300">Contact</a></li>
+        </ul>
+        <span class="block text-sm text-white text-center pb-4">© 2024 <a href="/" class="hover:underline">Marrigold™</a>. All Rights Reserved.</span>
+    </div>
+    
 
     <main>
         <section class="sm:flex align-middle items-center p-6 md:px-20 md:py-16">
@@ -106,9 +124,11 @@
                 <p class="leading-6 text-sm md:text-base">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit consectetur
                     sunt atque alias,
                     distinctio optio sit eveniet cumque excepturi minima?</p>
-                <button
+                <a href="/store">
+                    <button
                     class="px-2 py-1 text-base md:px-4 md:py-2 mt-4 md:text-lg text-white bg-primary border-2 border-primary rounded-full hover:bg-transparent hover:text-primary duration-300">Order
                     now</button>
+                </a>
             </div>
             <div class="image  md:w-1/2">
                 <img class="-ml-2 mt-4 md:mt-0 md:ml-10" src="/static/side.png" alt="">
@@ -264,6 +284,18 @@
 
 
     <script>
+        document.getElementById('hamburger').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('translate-x-full');
+            document.getElementById('mobile-menu').classList.toggle('translate-x-0');
+            document.body.classList.toggle('overflow-hidden');
+        });
+
+        document.getElementById('close-menu').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('translate-x-full');
+            document.getElementById('mobile-menu').classList.toggle('translate-x-0');
+            document.body.classList.toggle('overflow-hidden');
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
