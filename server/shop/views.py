@@ -131,6 +131,10 @@ def clear_user_cart(user):
 
 def initialize_payment_view(request):
     if request.method == 'POST':
+        location = request.POST.get('location')
+        if not location:
+            return render(request, 'payments/initialize.html', {'error': 'Location is required'})
+
         # Retrieve the user's cart
         cart = Cart.objects.get(user=request.user)
         items = cart.items.all()
@@ -154,6 +158,7 @@ def initialize_payment_view(request):
                 cart=cart,  # Pass the actual Cart instance
                 payment=payment,
                 status='completed',
+                location=location  # Assuming Order model has a location field
             )
             print(f"Order created: {order}")  # Add this line for debugging
             return redirect(payment_data['authorization_url'])
@@ -185,6 +190,13 @@ def verify_payment_view(request):
             payment = Payment.objects.get(reference=reference)
             payment.status = payment_data['status']
             payment.save()
+            
+            # Reset the quantity of CartItems to 1
+            cart = Cart.objects.get(user=request.user)
+            cart_items = cart.items.all()
+            for cart_item in cart_items:
+                cart_item.quantity = 1
+                cart_item.save()
 
             # Redirect to the payment_success view after successful verification
             return redirect('payment_success')
@@ -219,12 +231,15 @@ def payment_success(request):
     # Assuming you have a way to get the Payment instance
     # This could be from a session, a form submission, or any other method
     payment = Payment.objects.filter(user=request.user).latest('date')
+    
+    order = Order.objects.filter(user=request.user).latest('created_at')
 
     # Create a new order history entry
     order_history = OrderHistory.objects.create(
         user=request.user,
         total_price=total_price,
-        payment=payment  # Link the Payment instance to the OrderHistory instance
+        payment=payment,  # Link the Payment instance to the OrderHistory instance
+        location=order.location
     )
     order_history.items.set(cart_items)
 

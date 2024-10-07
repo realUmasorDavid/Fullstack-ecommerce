@@ -57,10 +57,10 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('user', 'cart__id', 'payment__id')
     
 class OrderHistoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'items_display', 'phone_number', 'total_price', 'status', 'delivered', 'payment_date')
-    list_filter = ('status', 'delivered' ,'payment_date')
+    list_display = ('id', 'user', 'items_display', 'phone_number', 'location', 'total_price', 'status', 'delivered', 'payment_date')
+    list_filter = ('status', 'delivered' , 'location', 'payment_date')
     search_fields = ('user__username', 'status', 'delivered')
-    readonly_fields = ('id', 'user', 'total_price', 'payment_date')
+    readonly_fields = ('id', 'user', 'total_price', 'location', 'payment_date')
     
     def items_display(self, obj):
         items = obj.items.all()
