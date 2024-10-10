@@ -45,7 +45,7 @@ def delete_item(request, pk):
 @login_required
 def view_cart(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
-    return render(request, 'checkout.html', {'cart': cart})  # Ensure the template name matches
+    return render(request, 'checkout.html', {'cart': cart})
 
 @login_required
 def home(request):
@@ -62,7 +62,7 @@ def store(request):
         'products': products,
     }
 
-    return render(request, 'index.html', context)  # Ensure the template name matches
+    return render(request, 'index.html', context)
 
 @login_required
 def profile(request):
@@ -77,7 +77,7 @@ def profile(request):
         user.save()
         user_profile.save()
         messages.success(request, 'Profile updated successfully.')
-        return redirect('update_profile')  # Redirect to the same page to display the updated profile
+        return redirect('update_profile')
     
     context = {
         'user': user, 
@@ -125,9 +125,8 @@ def logout(request):
     return redirect('login')
 
 def clear_user_cart(user):
-    # Assuming you have a Cart model that links to the user
     cart = Cart.objects.get(user=user)
-    cart.items.clear()  # Clear all items in the cart
+    cart.items.clear()
 
 def initialize_payment_view(request):
     if request.method == 'POST':
@@ -151,24 +150,22 @@ def initialize_payment_view(request):
                 email=email,
                 reference=payment_data['reference'],
                 status='pending',
-                order_id=cart  # Ensure this line is correct
+                order_id=cart
             )
             order = Order.objects.create(
                 user=request.user,
-                cart=cart,  # Pass the actual Cart instance
+                cart=cart,
                 payment=payment,
                 status='completed',
-                location=location  # Assuming Order model has a location field
+                location=location
             )
-            print(f"Order created: {order}")  # Add this line for debugging
+            print(f"Order created: {order}")
             return redirect(payment_data['authorization_url'])
         else:
-            # Handle the error case
             return render(request, 'payments/initialize.html', {'error': 'Payment initialization failed'})
 
-    # If the request method is not POST, render the initialize.html page
     cart = Cart.objects.get(user=request.user)
-    cart_items = cart.items.all()  # Retrieve the related CartItem instances
+    cart_items = cart.items.all()
     context = {
         'cart': cart,
         'cart_items': cart_items,
@@ -191,67 +188,44 @@ def verify_payment_view(request):
             payment.status = payment_data['status']
             payment.save()
             
-            # Reset the quantity of CartItems to 1
             cart = Cart.objects.get(user=request.user)
             cart_items = cart.items.all()
             for cart_item in cart_items:
                 cart_item.quantity = 1
                 cart_item.save()
 
-            # Redirect to the payment_success view after successful verification
             return redirect('payment_success')
         except Payment.DoesNotExist:
             return JsonResponse({'status': 'failed', 'message': 'Payment not found'})
 
     return JsonResponse({'status': 'failed', 'message': 'Payment verification failed'})
 
-# @login_required
-# def order(request):
-#     user = request.user
-#     payments = Payment.objects.filter(user=user).order_by('-date')
-#     orders = Order.objects.filter(user=user).order_by('-created_at')
-
-#     context = {
-#         'orders': orders,
-#         'payments': payments,
-#     }
-#     return render(request, 'orders.html', context)
-
 @login_required
 def payment_success(request):
     print("Order is being created")
 
-    # Assuming you have a way to get the user's cart items
     cart = Cart.objects.get(user=request.user)
     cart_items = cart.items.all()
 
-    # Calculate the total price
     total_price = sum(item.total for item in cart_items)
 
-    # Assuming you have a way to get the Payment instance
-    # This could be from a session, a form submission, or any other method
     payment = Payment.objects.filter(user=request.user).latest('date')
     
     order = Order.objects.filter(user=request.user).latest('created_at')
 
-    # Create a new order history entry
     order_history = OrderHistory.objects.create(
         user=request.user,
         total_price=total_price,
-        payment=payment,  # Link the Payment instance to the OrderHistory instance
         location=order.location
     )
     order_history.items.set(cart_items)
 
-    # Optionally, update the reference field in OrderHistory if needed
     order_history.reference = payment.reference
     order_history.save()
 
-    # Clear the cart
     clear_user_cart(request.user)
     print("Order Created!")
 
-    # Redirect to the order history page or any other page
     return redirect('order_history')
 
 @login_required

@@ -1,4 +1,3 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html>
 
@@ -274,7 +273,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Attach event listeners to dynamically generated buttons
             document.body.addEventListener('click', function(event) {
                 if (event.target.matches('[data-action="decrease"]')) {
                     const cartItemId = event.target.dataset.id;
@@ -311,7 +309,7 @@
                 totalElement.innerText = totalPrice.toFixed(2);
             }
         
-            // Define sendQuantitiesToBackend in the global scope
+            
             window.sendQuantitiesToBackend = function() {
                 console.log('sendQuantitiesToBackend called'); // Debugging log
                 const quantities = {};
