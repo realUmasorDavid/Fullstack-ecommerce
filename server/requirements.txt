@@ -1,16 +1,25 @@
 asgiref==3.8.1
+boto3 @ file:///C:/Users/david/OneDrive/Desktop/projectz/boto3-1.35.37-py3-none-any.whl#sha256=385ca77bf8ea4ab2d97f6e2435bdb29f77d9301e2f7ac796c2f465753c2adf3c
+botocore==1.35.37
 certifi==2024.8.30
 charset-normalizer==3.3.2
 dj-database-url==2.2.0
 Django==5.1.1
+django-cors-headers==4.4.0
+django-environ==0.11.2
+django-storages==1.14.4
 gunicorn==23.0.0
 idna==3.8
+jmespath==1.0.1
 packaging==24.1
 pillow==10.4.0
 psycopg2-binary==2.9.9
+python-dateutil==2.9.0.post0
 python-decouple==3.8
 python-dotenv==1.0.1
 requests==2.32.3
+s3transfer==0.10.3
+six==1.16.0
 sqlparse==0.5.1
 typing_extensions==4.12.2
 tzdata==2024.1
