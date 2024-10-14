@@ -16,8 +16,6 @@ DEBUG = config('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'shop',
-    'storages',  # Add this line
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -85,11 +83,11 @@ WSGI_APPLICATION = 'server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'shop',
-        'USER': 'postgres',
-        'PASSWORD': config('DB_PASSWORD'),
-        'PORT': '5432',
-        'HOST': 'localhost',
+        'NAME': config('DATABASE_NAME'),
+        'USER': config('DATABASE_USER'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
+        'HOST': config('DATABASE_HOST'),
+        'OPTIONS': {'sslmode': 'require'},
     }
 }
 
