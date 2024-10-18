@@ -126,7 +126,7 @@ def logout(request):
 
 def clear_user_cart(user):
     cart = Cart.objects.get(user=user)
-    cart.items.clear()
+    cart.items.through.objects.filter(cart=cart).delete()
 
 def initialize_payment_view(request):
     if request.method == 'POST':
@@ -136,7 +136,7 @@ def initialize_payment_view(request):
 
         # Retrieve the user's cart
         cart = Cart.objects.get(user=request.user)
-        items = cart.items.all()
+        cart_items = cart.items.all()
         amount = cart.amount
         email = request.user.email
         callback_url = request.build_absolute_uri('/payments/verify/')
@@ -154,7 +154,7 @@ def initialize_payment_view(request):
             )
             order = Order.objects.create(
                 user=request.user,
-                cart=cart,
+                cart=", ".join([str(item) for item in cart_items]),
                 payment=payment,
                 status='completed',
                 location=location
@@ -187,12 +187,25 @@ def verify_payment_view(request):
             payment = Payment.objects.get(reference=reference)
             payment.status = payment_data['status']
             payment.save()
-            
+
             cart = Cart.objects.get(user=request.user)
             cart_items = cart.items.all()
+
+            order = Order.objects.filter(user=request.user).latest('created_at')
+            order_history = OrderHistory.objects.create(
+                user=request.user,
+                items=", ".join([str(item) for item in cart_items]),
+                reference=payment.reference,
+                location=order.location,
+                total_price=cart.amount,
+                payment=payment
+            )
+
             for cart_item in cart_items:
                 cart_item.quantity = 1
                 cart_item.save()
+
+            clear_user_cart(request.user)
 
             return redirect('payment_success')
         except Payment.DoesNotExist:
@@ -204,25 +217,6 @@ def verify_payment_view(request):
 def payment_success(request):
     print("Order is being created")
 
-    cart = Cart.objects.get(user=request.user)
-    cart_items = cart.items.all()
-
-    total_price = sum(item.total for item in cart_items)
-
-    payment = Payment.objects.filter(user=request.user).latest('date')
-    
-    order = Order.objects.filter(user=request.user).latest('created_at')
-
-    order_history = OrderHistory.objects.create(
-        user=request.user,
-        total_price=total_price,
-        location=order.location
-    )
-    order_history.items.set(cart_items)
-
-    order_history.reference = payment.reference
-    order_history.save()
-
     clear_user_cart(request.user)
     print("Order Created!")
 
@@ -232,3 +226,7 @@ def payment_success(request):
 def order_history(request):
     orders = OrderHistory.objects.filter(user=request.user).order_by('-payment_date')
     return render(request, 'order_history.html', {'orders': orders})
+
+def order_details(request, order_id):
+    order = get_object_or_404(OrderHistory, id=order_id, user=request.user)
+    return render(request, 'order_details.html', {'order': order})

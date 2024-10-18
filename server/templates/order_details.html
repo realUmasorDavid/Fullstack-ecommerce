@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marrigold Order Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#e78e2a',
+                        secondary: '#FEFEFF',
+                    },
+                    fontFamily: {
+                        Poppins: ["Poppins", "sans-serif"]
+                    },
+                },
+            },
+        }
+
+        $(document).ready(function() {
+            $("input:checkbox").click(function() {
+                return false;
+            });
+        });
+    </script>
+</head>
+
+<body class="font-Poppins bg-secondary">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-4 text-primary">Order Details</h1>
+
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <div class="my-2">
+                <a href="/order" class="text-primary">Return back to Order History →</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="font-bold">Order ID:</p>
+                    <p>{{ order.id }}</p>
+                </div>
+                <div>
+                    <p class="font-bold">Items:</p>
+                    <p>{{ order.items }}</p>
+                </div>
+                <div>
+                    <p class="font-bold">Total Price:</p>
+                    <p>{{ order.total_price }}</p>
+                </div>
+                <div>
+                    <p class="font-bold">Location:</p>
+                    <p>{{ order.location }}</p>
+                </div>
+                <div>
+                    <p class="font-bold">Reference:</p>
+                    <p>{{ order.reference }}</p>
+                </div>
+                <div>
+                    <p class="font-bold">Payment Date:</p>
+                    <p>{{ order.payment_date }}</p>
+                </div>
+                <div>
+                    <p class="font-bold">Rider:</p>
+                    {% if order.rider == 'none' %}
+                        <p>Order hasn't been accepted</p>
+                        {% else %}
+                        <p>{{ order.rider }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="font-bold">Delivery Status:</p>
+                    {% if order.delivered %}
+                    <p class="text-green-500 bg-green-100 rounded-full px-2 py-1 inline-block">Delivered</p>
+                    {% elif order.delivered is None %}
+                    <p class="text-yellow-500 bg-yellow-100 rounded-full px-2 py-1 inline-block">Pending</p>
+                    {% else %}
+                    <p class="text-red-500 bg-red-100 rounded-full px-2 py-1 inline-block">Failed</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="font-bold">Order Progress:</p>
+                    <ol class="relative border-l border-gray-200">
+                        <li class="mb-10 ml-4">
+                            <div class="absolute w-3 h-3 bg-green-200 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                            <time class="mb-1 text-sm font-normal leading-none text-gray-400">Order Sent</time>
+                            <div class="flex items-center mb-2">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500 accent-[#008000] pointer-events-none" checked>
+                                <label class="ml-2 text-sm font-normal text-gray-500">Order Sent</label>
+                            </div>
+                        </li>
+                        <li class="mb-10 ml-4">
+                            <div class="absolute w-3 h-3 {% if order.status == 'received' or order.status == 'ready' or order.status == 'delivered' %}bg-green-200{% else %}bg-gray-200{% endif %} rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                            <time class="mb-1 text-sm font-normal leading-none text-gray-400">Order Received</time>
+                            <div class="flex items-center mb-2">
+                                {% if order.status == 'received'  or order.status == 'ready' or order.status == 'delivered' %}
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500 accent-[#008000] pointer-events-none" checked>
+                                    {% else %}
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500" disabled>
+                                {% endif %}
+                                
+                                <label class="ml-2 text-sm font-normal text-gray-500">Order Received</label>
+                            </div>
+                        </li>
+                        <li class="mb-10 ml-4">
+                            <div class="absolute w-3 h-3 {% if order.status == 'ready' or order.status == 'delivered' %}bg-green-200{% else %}bg-gray-200{% endif %} rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                            <time class="mb-1 text-sm font-normal leading-none text-gray-400">Order Ready</time>
+                            <div class="flex items-center mb-2">
+                                {% if order.status == 'ready' or order.status == 'delivered' %}
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500 accent-[#008000] pointer-events-none" checked>
+                                    {% else %}
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500" disabled>
+                                {% endif %}
+                                <label class="ml-2 text-sm font-normal text-gray-500">Order Ready</label>
+                            </div>
+                        </li>
+                        <li class="ml-4">
+                            <div class="absolute w-3 h-3 {% if order.status == 'delivered' %}bg-green-200{% else %}bg-gray-200{% endif %} rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                            <time class="mb-1 text-sm font-normal leading-none text-gray-400">Order Delivered</time>
+                            <div class="flex items-center mb-2">
+                                {% if order.status == 'delivered' %}
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500 accent-[#008000] pointer-events-none" checked>
+                                    {% else %}
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500" disabled>
+                                {% endif %}
+                                <label class="ml-2 text-sm font-normal text-gray-500">Order Delivered</label>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+
+</html>

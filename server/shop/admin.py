@@ -20,10 +20,6 @@ class CartItemInline(admin.TabularInline):
 class CartItemInline2(admin.TabularInline):
     model = Payment.items.through  # This specifies the many-to-many relationship
     extra = 1  # Number of extra forms to display
-    
-class CartItemInline3(admin.TabularInline):
-    model = OrderHistory.items.through  # This specifies the many-to-many relationship
-    extra = 1  # Number of extra forms to display
 
 class CartAdmin(admin.ModelAdmin):
     inlines = [CartItemInline]
@@ -57,15 +53,11 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('user', 'cart__id', 'payment__id')
     
 class OrderHistoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'items_display', 'phone_number', 'location', 'total_price', 'status', 'delivered', 'payment_date')
-    list_filter = ('status', 'delivered' , 'location', 'payment_date')
+    list_display = ('id', 'user', 'items', 'phone_number', 'location', 'total_price', 'status', 'rider', 'delivered', 'payment_date')
+    list_filter = ('status', 'delivered', 'rider', 'location', 'payment_date')
     search_fields = ('user__username', 'status', 'delivered')
     readonly_fields = ('id', 'user', 'total_price', 'location', 'payment_date')
     
-    def items_display(self, obj):
-        items = obj.items.all()
-        return ', '.join([str(item) for item in items])
-    items_display.short_description = 'Items'
     
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'phone_number')

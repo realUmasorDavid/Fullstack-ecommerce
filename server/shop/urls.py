@@ -19,5 +19,6 @@ urlpatterns = [
     path('payments/verify/', views.verify_payment_view, name='verify_payment'),
     path('payment/success/', views.payment_success, name='payment_success'),
     path('order', views.order_history, name='order_history'),
+    path('order/<int:order_id>/', views.order_details, name='order_details'),
     # path('deleteitem', views.delete_cart, name='deleteitem')
 ]

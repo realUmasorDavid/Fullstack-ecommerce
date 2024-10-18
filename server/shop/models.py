@@ -84,7 +84,7 @@ class Payment(models.Model):
 class Order(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, blank=True, null=True)
+    cart = models.CharField(max_length=255, blank=True, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, blank=True, null=True)
     location = models.CharField(max_length=255, null=True)
     delivered = models.BooleanField(default=None, blank=True, null=True)
@@ -98,18 +98,35 @@ class Order(models.Model):
 class OrderHistory(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    items = models.ManyToManyField(CartItem)
+    items = models.CharField(max_length=255, blank=True, null=True)
     reference = models.CharField(max_length=255, null=True, blank=True)
     location = models.CharField(max_length=255, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=50, default="not ready", null=True, blank=True)
+    status = models.CharField(
+        max_length=50,
+        choices=[
+            ('sent', 'Order Sent'),
+            ('received', 'Order Received'),
+            ('ready', 'Order Ready'),
+            ('delivered', 'Order Delivered'),
+        ],
+        default='sent',
+    )
+    rider = models.CharField(
+        max_length=50,
+        choices=[
+            ('LCU Errands', 'lcu_errands'),
+            ('Green Baba Delivery', 'greenbaba'),
+        ],
+        default='none',
+    )
     delivered = models.BooleanField(default=None, blank=True, null=True)
     payment_date = models.DateTimeField(auto_now_add=True)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"Order {self.id} by {self.user.username}"
-    
+
     @property
     def phone_number(self):
         try:
