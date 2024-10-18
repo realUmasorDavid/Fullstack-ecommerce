@@ -141,7 +141,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-Media files (user-uploaded content)
+# Media files (user-uploaded content)
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
