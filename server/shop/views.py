@@ -154,7 +154,7 @@ def initialize_payment_view(request):
             )
             order = Order.objects.create(
                 user=request.user,
-                items=", ".join([str(item) for item in cart_items]),
+                cart=", ".join([str(item) for item in cart_items]),
                 payment=payment,
                 status='completed',
                 location=location
