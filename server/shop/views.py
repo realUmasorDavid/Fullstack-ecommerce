@@ -26,21 +26,34 @@ class UpdateCartQuantitiesView(View):
 
 @login_required
 def add_to_cart(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_item, created = CartItem.objects.get_or_create(product=product)
-    cart.items.add(cart_item)
-    messages.success(request, f'{cart_item} added to cart!')
-    return redirect('store')
+    if request.method == 'POST':
+        product = get_object_or_404(Product, pk=pk)
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
+        cart.items.add(cart_item)
+
+        response_data = {
+            'success': True,
+            'message': f'{product.name} added to cart!',
+            'product_id': product.pk,
+            'product_name': product.name,
+            'product_image_url': product.image.url,
+            'product_price': product.price,
+        }
+        return JsonResponse(response_data)
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 @login_required
 def delete_item(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_item = get_object_or_404(CartItem, product=product)
-    cart.items.remove(cart_item)
-    messages.error(request, f'{cart_item} removed from cart!')
-    return redirect('store')
+    if request.method == 'POST':
+        product = get_object_or_404(Product, pk=pk)
+        cart = get_object_or_404(Cart, user=request.user)
+        cart_item = get_object_or_404(CartItem, product=product, cart=cart)
+        cart_item.delete()
+        return JsonResponse({'success': True, 'message': f'{product.name} removed from cart!'})
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 @login_required
 def view_cart(request):
