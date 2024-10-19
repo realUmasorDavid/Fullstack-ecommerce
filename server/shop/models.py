@@ -98,7 +98,7 @@ class Order(models.Model):
 class OrderHistory(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    items = models.CharField(max_length=255, blank=True, null=True)
+    user_order = models.CharField(max_length=255, blank=True, null=True)
     reference = models.CharField(max_length=255, null=True, blank=True)
     location = models.CharField(max_length=255, null=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)

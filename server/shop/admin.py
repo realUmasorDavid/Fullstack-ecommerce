@@ -53,7 +53,7 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('user', 'cart__id', 'payment__id')
     
 class OrderHistoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'items', 'phone_number', 'location', 'total_price', 'status', 'rider', 'delivered', 'payment_date')
+    list_display = ('id', 'user', 'user_order', 'phone_number', 'location', 'total_price', 'status', 'rider', 'delivered', 'payment_date')
     list_filter = ('status', 'delivered', 'rider', 'location', 'payment_date')
     search_fields = ('user__username', 'status', 'delivered')
     readonly_fields = ('id', 'user', 'total_price', 'location', 'payment_date')

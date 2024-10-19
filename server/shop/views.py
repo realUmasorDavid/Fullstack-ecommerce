@@ -194,7 +194,7 @@ def verify_payment_view(request):
             order = Order.objects.filter(user=request.user).latest('created_at')
             order_history = OrderHistory.objects.create(
                 user=request.user,
-                items=", ".join([str(item) for item in cart_items]),
+                user_order=", ".join([str(item) for item in cart_items]),
                 reference=payment.reference,
                 location=order.location,
                 total_price=cart.amount,
