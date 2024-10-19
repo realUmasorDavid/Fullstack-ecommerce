@@ -96,16 +96,21 @@ def signup(request):
         email = request.POST['email']
         password1 = request.POST['password1']
         phone_number = request.POST['phone']
+
+        if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+            return render(request, 'signup.html', {'error': 'Username or email is already in use'})
+
         if password1:
             user = User.objects.create_user(username, email, password1)
             user.save()
-            
+
             user_profile, created = Profile.objects.get_or_create(user=user)
             user_profile.phone_number = phone_number
             user_profile.save()
 
-            return redirect('login')
-        return render(request, 'signup.html', {'success': 'Account created successfully'})
+            return redirect('store')
+        else:
+            return render(request, 'signup.html', {'error': 'Unable to create account'})
     return render(request, 'signup.html')
 
 def login(request):
@@ -117,7 +122,7 @@ def login(request):
             auth.login(request, user)
             return redirect('store')
         else:
-            return render(request, 'login.html', {'error': 'Invalid credentials'})
+            return render(request, 'login.html', {'error': 'Incorrect username or password'})
     return render(request, 'login.html')
 
 def logout(request):
@@ -230,3 +235,10 @@ def order_history(request):
 def order_details(request, order_id):
     order = get_object_or_404(OrderHistory, id=order_id, user=request.user)
     return render(request, 'order_details.html', {'order': order})
+
+def error_404(request, exception):
+    data = {}
+    return render(request,'errors/404.html', data)
+
+def error_500(request, *args, **argv):
+    return render(request, 'errors/500.html', status=500)
