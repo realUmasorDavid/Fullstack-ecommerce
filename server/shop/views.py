@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.contrib import messages
+from django.conf import settings
 from .models import *
 import json
 from django.http import JsonResponse
@@ -66,13 +67,28 @@ def home(request):
 
 @login_required
 def store(request):
-    products = Product.objects.all()
+    categories = Category.objects.all()
+    selected_category = request.GET.get('category')
+    if selected_category:
+        products = Product.objects.filter(category__name=selected_category)
+    else:
+        products = Product.objects.all()
+
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        products_data = list(products.values('id', 'name', 'price', 'image'))
+        for product in products_data:
+            product['image'] = request.build_absolute_uri(settings.MEDIA_URL + product['image'])
+        return JsonResponse(products_data, safe=False)
+
     context = {
         'cart_items': cart_items,
         'cart': cart,
         'products': products,
+        'categories': categories,
+        'selected_category': selected_category,
     }
 
     return render(request, 'index.html', context)
