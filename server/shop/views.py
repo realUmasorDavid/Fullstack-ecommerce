@@ -80,7 +80,8 @@ def store(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         products_data = list(products.values('id', 'name', 'price', 'image'))
         for product in products_data:
-            product['image'] = request.build_absolute_uri(settings.MEDIA_URL + product['image'])
+            # product['image'] = request.build_absolute_uri(settings.MEDIA_URL + product['image'])
+            product['image'] = request.build_absolute_uri(product['image'])
         return JsonResponse(products_data, safe=False)
 
     context = {
