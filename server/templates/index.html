@@ -1,195 +1,34 @@
-    <!DOCTYPE html>
-    <html>
+<!DOCTYPE html>
+<html>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Include Toastify CSS -->
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-        <!-- Include Toastify JavaScript -->
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-        {% comment %} Flowbite CDN  {% endcomment %}
-        <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
-        <title>Marrigold</title>
-        <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            primary: '#e78e2a',
-                            secondary: '#FFC300',
-                        },
-                        fontFamily: {
-                            Poppins: ["Poppins", "sans-serif"]
-                        },
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Include Toastify JavaScript -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    {% comment %} Flowbite CDN  {% endcomment %}
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
+    <title>Marrigold</title>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#e78e2a',
+                        secondary: '#FFC300',
+                    },
+                    fontFamily: {
+                        Poppins: ["Poppins", "sans-serif"]
                     },
                 },
-            }
-
-            $(document).on('click', '.add-to-cart', function(e){
-                e.preventDefault();
-                var product_id = $(this).data("id");
-                var csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
-                var url = "{% url 'add_to_cart' 0 %}".replace('0', product_id);
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: {
-                        csrfmiddlewaretoken: csrf_token,
-                        action: 'post',
-                    },
-                    success: function(response){
-                        // Handle success response here
-                        console.log(response);
-            
-                        // Show Toastify notification
-                        Toastify({
-                            text: response.message,
-                            duration: 2000,
-                            close: true,
-                            gravity: "bottom", // `top` or `bottom`
-                            position: "right", // `left`, `center` or `right`
-                            backgroundColor: "#00d800", // Use the variable here
-                            className: "custom-toastify", // Apply custom CSS class
-                            stopOnFocus: true, // Prevents dismissing of toast on hover
-                        }).showToast();
-            
-                        // Update the cart count
-                        var cartCountElement = document.getElementById('quantity');
-                        var currentCount = parseInt(cartCountElement.innerText);
-                        cartCountElement.innerText = currentCount + 1;
-            
-                        // Update the cart items
-                        var cartItemsContainer = document.getElementById('cart-items-container');
-                        var deleteUrl = "{% url 'delete_item' 0 %}".replace('0', response.product_id);
-                        var newCartItem = `
-                            <div id="cart-item-${response.product_id}" class="flex justify-between mb-2">
-                                <div class="flex items-center">
-                                    <img src="${response.product_image_url}" alt="${response.product_name}" class="h-10 w-10 object-cover mr-2" />
-                                    <span>${response.product_name}</span>
-                                </div>
-                                <div class="flex items-center -ml-8">
-                                    <button type="button" data-action="decrease" data-id="${response.product_id}" data-price="${response.product_price}" class="text-red-500 hover:text-red-700">-</button>
-                                    <input type="text" id="quantity-${response.product_id}" value="1" min="1" class="bg-transparent w-10 text-center border-transparent" disabled>
-                                    <button type="button" data-action="increase" data-id="${response.product_id}" data-price="${response.product_price}" class="mr-2 text-green-500 hover:text-green-700">+</button>
-                                    <span class="mr-2"><span class="">&#x20A6</span><span id="total-${response.product_id}">${response.product_price}</span></span>
-                                    <a id="delete_from_cart" href="${deleteUrl}" data-id="${response.product_id}" class="delete-item">
-                                        <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M4 7H20" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M6 7V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V7" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                        cartItemsContainer.innerHTML += newCartItem;
-                    },
-                    error: function(error){
-                        // Handle error response here
-                        console.log(error);
-                    }
-                });
-            });
-            
-            $(document).on('click', '.delete-item', function(e){
-                e.preventDefault();
-                var product_id = $(this).data("id");
-                var csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
-                var url = "{% url 'delete_item' 0 %}".replace('0', product_id);
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: {
-                        csrfmiddlewaretoken: csrf_token,
-                        action: 'post',
-                    },
-                    success: function(response){
-                        // Handle success response here
-                        console.log(response);
-            
-                        // Show Toastify notification
-                        Toastify({
-                            text: response.message,
-                            duration: 2000,
-                            close: true,
-                            gravity: "bottom", // `top` or `bottom`
-                            position: "right", // `left`, `center` or `right`
-                            backgroundColor: "#ff0000", // Use the variable here
-                            className: "custom-toastify", // Apply custom CSS class
-                            stopOnFocus: true, // Prevents dismissing of toast on hover
-                        }).showToast();
-            
-                        // Remove the item from the cart items list
-                        var cartItemElement = document.getElementById(`cart-item-${product_id}`);
-                        if (cartItemElement) {
-                            cartItemElement.remove();
-                        }
-            
-                        // Update the cart count
-                        var cartCountElement = document.getElementById('quantity');
-                        var currentCount = parseInt(cartCountElement.innerText);
-                        cartCountElement.innerText = currentCount - 1;
-                    },
-                    error: function(error){
-                        // Handle error response here
-                        console.log(error);
-                    }
-                });
-            });
-        </script>
-        <script>
-            {% comment %} document.addEventListener('DOMContentLoaded', function () {
-                const categoryButtons = document.querySelectorAll('.category-button');
-                const itemsContainer = document.getElementById('items-container');
-    
-                categoryButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        const category = this.getAttribute('data-category');
-                        fetch(`/store?category=${category}`, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                itemsContainer.innerHTML = '';
-                                data.forEach(product => {
-                                    const productCard = `
-                                        <div class="group">
-                                            <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                                                <img src="${product.image}" alt="${product.name}" class="h-60 w-full object-cover object-center group-hover:opacity-75">
-                                            </div>
-                                            <div class="flex align-middle items-center justify-between">
-                                                <div>
-                                                    <h3 class="mt-4 text-sm text-gray-700">${product.name}</h3>
-                                                    <p class="mt-1 text-lg font-medium text-gray-900"><span class="font-bold">&#x20A6</span> ${product.price}</p>
-                                                </div>
-                                                <form id="addToCartForm" action="/add_to_cart/${product.id}/" method="post" style="display:inline;">
-                                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                                                    <button type="submit" data-id="${product.id}" class="add-to-cart px-2 py-1.5 text-sm bg-primary text-white h-1/2 mt-4 rounded-lg">Add to Cart</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    `;
-                                    itemsContainer.innerHTML += productCard;
-                                });
-                            });
-                    });
-                });
-            }); {% endcomment %}
-        </script>
-        <style>
-            .scrollable-container {
-                overflow-x: auto; /* Enable horizontal scrolling */
-                white-space: nowrap; /* Prevent wrapping of content */
-                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-            }            
-        </style>
-    </head>
+            },
+        }
+    </script>
+</head>
 
     <body class="font-Poppins">
         <!-- Navigation Bar  -->
@@ -197,7 +36,7 @@
             <div class="flex flex-wrap place-items-center font-Poppins bg-primary">
                 <section class="relative w-full">
                     <nav class="flex justify-between bg-primary text-white max-w-full">
-                        <div class="px-5 xl:px-12 py-6 flex justify-between md:justify-none w-full items-center">
+                        <div class="px-5 xl:px-12 py-6 flex w-full items-center">
                             <a href="/">
                                 <h1 class="text-lg">Marrigold</h1>
                             </a>
@@ -218,7 +57,7 @@
 
 
 
-                            <div class="flex space-x-5 items-center">
+                            <div class="hidden xl:flex space-x-5 items-center">
                                 <a onclick="toggleMenu()"
                                     class="flex items-center hover:text-gray-200 relative cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
@@ -240,130 +79,181 @@
                                 </a>
                             </div>
                         </div>
+
+                        
+                        <a onclick="toggleMenu()" class="xl:hidden flex mr-3 items-center cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hover:text-gray-200" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span
+                                class="absolute top-5 right-[3.4rem] md:top-8 lg:-top-2 lg:-right-2 bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center">{{ cart.item_count }}</span>
+                        </a>
+                        <a href="/profile" class="xl:hidden flex items-center mr-6 hover:text-gray-200 relative cursor-pointer">
+                            <svg width="800px" height="800px" viewBox="0 0 24 24" class="h-6 w-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.12 12.78C12.05 12.77 11.96 12.77 11.88 12.78C10.12 12.72 8.71997 11.28 8.71997 9.50998C8.71997 7.69998 10.18 6.22998 12 6.22998C13.81 6.22998 15.28 7.69998 15.28 9.50998C15.27 11.28 13.88 12.72 12.12 12.78Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M18.74 19.3801C16.96 21.0101 14.6 22.0001 12 22.0001C9.40001 22.0001 7.04001 21.0101 5.26001 19.3801C5.36001 18.4401 5.96001 17.5201 7.03001 16.8001C9.77001 14.9801 14.25 14.9801 16.97 16.8001C18.04 17.5201 18.64 18.4401 18.74 19.3801Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                        </a>
                     </nav>
                 </section>
             </div>
         </nav>
 
-        <!-- Cart Sidebar -->
-        <div id="cart" class="z-50 fixed translate-x-full top-0 right-0 h-full w-full sm:w-96 bg-white text-black p-4 shadow-md transform transition-transform duration-300 ease-in-out">
-            <div class="flex flex-col h-full">
-                <div class="flex-1 overflow-y-auto">
-                    <h1 class='text-lg font-bold mb-4'>Cart</h1>
-                    <div id="cart-items-container">
-                        <!-- Cart items will be dynamically added here -->
-                        {% for cart_item in cart.items.all %}
-                        <div class="flex justify-between mb-2">
-                            <div class="flex items-center">
-                                <img src="{{ cart_item.product.image.url }}" alt="{{ cart_item.product.name }}" class="h-10 w-10 object-cover mr-2" />
-                                <span>{{ cart_item.product.name }}</span>
-                            </div>
-                            <div class="flex items-center -ml-8">
-                                <button type="button" data-action="decrease" data-id="{{ cart_item.id }}" data-price="{{ cart_item.product.price }}" class="text-red-500 hover:text-red-700">-</button>
-                                <input type="text" id="quantity-{{ cart_item.id }}" value="{{ cart_item.quantity }}" min="1" class="bg-transparent w-10 text-center border-transparent" disabled>
-                                <button type="button" data-action="increase" data-id="{{ cart_item.id }}" data-price="{{ cart_item.product.price }}" class="mr-2 text-green-500 hover:text-green-700">+</button>
-                                <span class="mr-2"><span class="">&#x20A6</span><span id="total-{{ cart_item.id }}">{{ cart_item.total }}</span></span>
-                                <a id="delete_from_cart" href="{% url 'delete_item' cart_item.product.pk %}" data-id="{{ cart_item.product.pk }}" class="delete-item">
-                                    <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4 7H20" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M6 7V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V7" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </a>
-                            </div>
+    <!-- Cart Sidebar -->
+    <div id="cart" class="z-50 fixed translate-x-full top-0 right-0 h-full w-full sm:w-96 bg-white text-black p-4 shadow-md transform transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full">
+            <div class="flex-1 overflow-y-auto">
+                <h1 class='text-lg font-bold mb-4'>Cart</h1>
+                <div id="cart-items-container">
+                    <!-- Cart items will be dynamically added here -->
+                    {% for cart_item in cart.items.all %}
+                    <div class="flex justify-between mb-2">
+                        <div class="flex items-center">
+                            <img src="{{ cart_item.product.image.url }}" alt="{{ cart_item.product.name }}" class="h-10 w-10 object-cover mr-2" />
+                            <span>{{ cart_item.product.name }}</span>
                         </div>
-                        {% endfor %}
+                        <div class="flex items-center -ml-8">
+                            <button type="button" data-action="decrease" data-id="{{ cart_item.id }}" data-price="{{ cart_item.product.price }}" class="text-red-500 hover:text-red-700">-</button>
+                            <input type="text" id="quantity-{{ cart_item.id }}" value="{{ cart_item.quantity }}" min="1" class="bg-transparent w-10 text-center border-transparent" disabled>
+                            <button type="button" data-action="increase" data-id="{{ cart_item.id }}" data-price="{{ cart_item.product.price }}" class="mr-2 text-green-500 hover:text-green-700">+</button>
+                            <span class="mr-2"><span class="">&#x20A6</span><span id="total-{{ cart_item.id }}">{{ cart_item.total }}</span></span>
+                            <a href="{% url 'delete_item' cart_item.product.pk %}">
+                                <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 7H20" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M6 7V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V7" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </a>
+                            
+                        </div>
                     </div>
-                </div>
-                <div class="flex justify-between -mt-16">
-                    <button onclick="sendQuantitiesToBackend()" class="bg-primary text-white px-4 py-2 rounded-md">Checkout</button>
-                    <button onclick="toggleMenu()" class="text-black hover:text-gray-600">Close</button>
+                    {% endfor %}
                 </div>
             </div>
-        </div>
-
-        
-
-    <div id="default-carousel" class="hidden lg:block relative w-full" data-carousel="slide">
-        <!-- Carousel wrapper -->
-        <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
-            <!-- Item 1 -->
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <section class="mx-auto my-8 relative w-11/12 h-[300px] flex justify-center items-center bg-cover bg-center rounded-md bg-[url('/static/cover.jpg')]">
-                </section>
-            </div>
-            <!-- Item 2 -->
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <section class="mx-auto my-8 relative w-11/12 h-[300px] flex justify-center items-center bg-cover bg-center rounded-md bg-[url('/static/cover2.jpg')]">
-                </section>
-            </div>
-            <!-- Item 3 -->
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <section class="mx-auto my-8 relative w-11/12 h-[300px] flex justify-center items-center bg-cover bg-center rounded-md bg-[url('/static/g1.jpg')]">
-                    <h2 class="text-4xl text-white font-title">Delicious Meals Delivered to Your Doorstep</h2>
-                </section>
-            </div>
-            <!-- Item 4 -->
-            <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                <section class="mx-auto my-8 relative w-11/12 h-[300px] flex justify-center items-center bg-cover bg-center rounded-md bg-[url('/static/g1.jpg')]">
-                    <h2 class="text-4xl text-white font-title">Delicious Meals Delivered to Your Doorstep</h2>
-                </section>
+            <div class="flex justify-between -mt-16">
+                <button onclick="sendQuantitiesToBackend()" class="bg-primary text-white px-4 py-2 rounded-md">Checkout</button>
+                <button onclick="toggleMenu()" class="text-black hover:text-gray-600">Close</button>
             </div>
         </div>
-        <!-- Slider indicators -->
-        <div class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1" data-carousel-slide-to="0"></button>
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2" data-carousel-slide-to="1"></button>
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 3" data-carousel-slide-to="2"></button>
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 4" data-carousel-slide-to="3"></button>
-        </div>
-        <!-- Slider controls -->
-        <button type="button" class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
-            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-                <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
-                </svg>
-                <span class="sr-only">Previous</span>
-            </span>
-        </button>
-        <button type="button" class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
-            <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-                <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                </svg>
-                <span class="sr-only">Next</span>
-            </span>
-        </button>
     </div>
+    
+    
 
-    <!-- Category Filter Buttons -->
-    <div class="mt-4 mx-4 md:mx-16 flex space-x-4 scrollable-container">
-        <button class="category-button bg-primary text-white px-4 py-2 rounded" data-category="">All</button>
-        {% for category in categories %}
-        <button class="category-button bg-primary text-white px-4 py-2 rounded" data-category="{{ category.name }}">{{ category.name }}</button>
+
+
+    {% if messages %}
+    <div class="messages text-white">
+        {% for message in messages %}
+        <script>
+            let backgroundColor = "#0000ff"; // Default color
+            if ("{{ message.tags }}" === "success") {
+                backgroundColor = "#00ff00";
+            } else if ("{{ message.tags }}" === "error") {
+                backgroundColor = "#ff0000";
+            } else if ("{{ message.tags }}" === "warning") {
+                backgroundColor = "#ffa500";
+            } else if ("{{ message.tags }}" === "info") {
+                backgroundColor = "#00ffff";
+            } else if ("{{ message.tags }}" === "debug") {
+                backgroundColor = "#800080";
+            }
+
+            Toastify({
+                text: "{{ message }}",
+                duration: 2000,
+                close: true,
+                gravity: "bottom", // `top` or `bottom`
+                position: "right", // `left`, `center` or `right`
+                backgroundColor: backgroundColor, // Use the variable here
+                stopOnFocus: true, // Prevents dismissing of toast on hover
+            }).showToast();
+        </script>
         {% endfor %}
-    </div>    
+    </div>
+    {% endif %}
 
-    <!-- Product Card -->
-    <div class="bg-white">
-        <div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-            <h2 class="sr-only">Products</h2>
-            <div id="items-container" class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-                <!-- Product Item Render Script -->
-                {% for product in products %}
-                <div class="group">
-                    <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="h-60 w-full object-cover object-center group-hover:opacity-75">
-                    </div>
-                    <div class="flex align-middle items-center justify-between">
-                        <div>
-                            <h3 class="mt-4 text-sm text-gray-700">{{ product.name }}</h3>
-                            <p class="mt-1 text-lg font-medium text-gray-900"><span class="font-bold">&#x20A6</span> {{ product.price }}</p>
+    
+
+<div id="default-carousel" class="hidden lg:block relative w-full" data-carousel="slide">
+    <!-- Carousel wrapper -->
+    <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
+        <!-- Item 1 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <section class="mx-auto my-8 relative w-11/12 h-[300px] flex justify-center items-center bg-cover bg-center rounded-md bg-[url('/static/cover.jpg')]">
+            </section>
+        </div>
+        <!-- Item 2 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <section class="mx-auto my-8 relative w-11/12 h-[300px] flex justify-center items-center bg-cover bg-center rounded-md bg-[url('/static/cover2.jpg')]">
+            </section>
+        </div>
+        <!-- Item 3 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <section class="mx-auto my-8 relative w-11/12 h-[300px] flex justify-center items-center bg-cover bg-center rounded-md bg-[url('/static/g1.jpg')]">
+                <h2 class="text-4xl text-white font-title">Delicious Meals Delivered to Your Doorstep</h2>
+            </section>
+        </div>
+        <!-- Item 4 -->
+        <div class="hidden duration-700 ease-in-out" data-carousel-item>
+            <section class="mx-auto my-8 relative w-11/12 h-[300px] flex justify-center items-center bg-cover bg-center rounded-md bg-[url('/static/g1.jpg')]">
+                <h2 class="text-4xl text-white font-title">Delicious Meals Delivered to Your Doorstep</h2>
+            </section>
+        </div>
+    </div>
+    <!-- Slider indicators -->
+    <div class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
+        <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1" data-carousel-slide-to="0"></button>
+        <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2" data-carousel-slide-to="1"></button>
+        <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 3" data-carousel-slide-to="2"></button>
+        <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 4" data-carousel-slide-to="3"></button>
+    </div>
+    <!-- Slider controls -->
+    <button type="button" class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+            <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+            </svg>
+            <span class="sr-only">Previous</span>
+        </span>
+    </button>
+    <button type="button" class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+            <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <span class="sr-only">Next</span>
+        </span>
+    </button>
+</div>
+
+        <!-- Product Card  -->
+        <div class="bg-white">
+            <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+                <h2 class="sr-only">Products</h2>
+                <div id="items-container"
+                    class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+                    <!-- Product Item Render Script  -->
+                    {% for product in products %}
+                    <div class="group">
+                        <div
+                            class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                class="h-60 w-full object-cover object-center group-hover:opacity-75">
                         </div>
-                        <form id="addToCartForm" action="{% url 'add_to_cart' product.pk %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" data-id="{{ product.pk }}" class="add-to-cart px-2 py-1.5 text-sm bg-primary text-white h-1/2 mt-4 rounded-lg">Add to Cart</button>
-                        </form>
+                        <div class="flex align-middle items-center justify-between">
+                            <div class="">
+                                <h3 class="mt-4 text-sm text-gray-700">{{ product.name }}</h3>
+                                <p class="mt-1 text-lg font-medium text-gray-900"><span class="font-bold">&#x20A6</span> {{ product.price }}</p>
+                            </div>
+                            <form id="addToCartForm" action="{% url 'add_to_cart' product.pk %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" data-id="{{ product.pk }}" class="add-to-cart px-2 py-1.5 text-sm bg-primary text-white h-1/2 mt-4 rounded-lg">Add to Cart</button>
+                            </form>
+                            
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
@@ -371,88 +261,92 @@
         </div>
     </div>
 
-        <script>
+    <script>
 
 
-            function toggleMenu() {
-                let cartElement = document.getElementById('cart');
-                cartElement.classList.toggle("translate-x-0");
-                cartElement.classList.toggle("translate-x-full");
-            }
+        function toggleMenu() {
+            let cartElement = document.getElementById('cart');
+            cartElement.classList.toggle("translate-x-0");
+            cartElement.classList.toggle("translate-x-full");
+        }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                document.body.addEventListener('click', function(event) {
-                    if (event.target.matches('[data-action="decrease"]')) {
-                        const cartItemId = event.target.dataset.id;
-                        const price = parseFloat(event.target.dataset.price);
-                        decreaseItemQuantity(cartItemId, price);
-                    } else if (event.target.matches('[data-action="increase"]')) {
-                        const cartItemId = event.target.dataset.id;
-                        const price = parseFloat(event.target.dataset.price);
-                        increaseItemQuantity(cartItemId, price);
-                    }
-                });
-            
-                function decreaseItemQuantity(cartItemId, price) {
-                    const quantityElement = document.getElementById(`quantity-${cartItemId}`);
-                    let quantity = parseInt(quantityElement.value);
-                    if (quantity > 1) {
-                        quantity -= 1;
-                        quantityElement.value = quantity;
-                        updateTotalPrice(cartItemId, price, quantity);
-                    }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.addEventListener('click', function(event) {
+                if (event.target.matches('[data-action="decrease"]')) {
+                    const cartItemId = event.target.dataset.id;
+                    const price = parseFloat(event.target.dataset.price);
+                    decreaseItemQuantity(cartItemId, price);
+                } else if (event.target.matches('[data-action="increase"]')) {
+                    const cartItemId = event.target.dataset.id;
+                    const price = parseFloat(event.target.dataset.price);
+                    increaseItemQuantity(cartItemId, price);
                 }
-            
-                function increaseItemQuantity(cartItemId, price) {
-                    const quantityElement = document.getElementById(`quantity-${cartItemId}`);
-                    let quantity = parseInt(quantityElement.value);
-                    quantity += 1;
+            });
+        
+            function decreaseItemQuantity(cartItemId, price) {
+                const quantityElement = document.getElementById(`quantity-${cartItemId}`);
+                let quantity = parseInt(quantityElement.value);
+                if (quantity > 1) {
+                    quantity -= 1;
                     quantityElement.value = quantity;
                     updateTotalPrice(cartItemId, price, quantity);
                 }
+            }
+        
+            function increaseItemQuantity(cartItemId, price) {
+                const quantityElement = document.getElementById(`quantity-${cartItemId}`);
+                let quantity = parseInt(quantityElement.value);
+                quantity += 1;
+                quantityElement.value = quantity;
+                updateTotalPrice(cartItemId, price, quantity);
+            }
+        
+            function updateTotalPrice(cartItemId, price, quantity) {
+                const totalElement = document.getElementById(`total-${cartItemId}`);
+                const totalPrice = price * quantity;
+                totalElement.innerText = totalPrice.toFixed(2);
+            }
+        
             
-                function updateTotalPrice(cartItemId, price, quantity) {
-                    const totalElement = document.getElementById(`total-${cartItemId}`);
-                    const totalPrice = price * quantity;
-                    totalElement.innerText = totalPrice.toFixed(2);
-                }
-            
-                
-                window.sendQuantitiesToBackend = function() {
-                    console.log('sendQuantitiesToBackend called'); // Debugging log
-                    const quantities = {};
-                    document.querySelectorAll('[id^="quantity-"]').forEach(element => {
-                        const cartItemId = element.id.split('-')[1];
-                        quantities[cartItemId] = parseInt(element.value);
-                    });
-            
-                    fetch('{% url "update_cart_quantities" %}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        },
-                        body: JSON.stringify(quantities)
+            window.sendQuantitiesToBackend = function() {
+                console.log('sendQuantitiesToBackend called'); // Debugging log
+                const quantities = {};
+                document.querySelectorAll('[id^="quantity-"]').forEach(element => {
+                    const cartItemId = element.id.split('-')[1];
+                    quantities[cartItemId] = parseInt(element.value);
+                });
+        
+                fetch('{% url "update_cart_quantities" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(quantities)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Quantities updated successfully'); // Debugging log
+                            window.location.href = '{% url "initialize_payment" %}'; // Redirect to the payment initialization page
+                        } else {
+                            console.error('Failed to update quantities'); // Debugging log
+                            alert('Failed to update quantities');
+                        }
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                console.log('Quantities updated successfully'); // Debugging log
-                                window.location.href = '{% url "initialize_payment" %}'; // Redirect to the payment initialization page
-                            } else {
-                                console.error('Failed to update quantities'); // Debugging log
-                                alert('Failed to update quantities');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error); // Debugging log
-                            alert('An error occurred while updating quantities');
-                        });
-                }
-            });    
-            
-        </script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    </body>
+                    .catch(error => {
+                        console.error('Error:', error); // Debugging log
+                        alert('An error occurred while updating quantities');
+                    });
+            }
+        });
+        
+        
+        
 
-    </html>
+
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+</body>
+
+</html>
