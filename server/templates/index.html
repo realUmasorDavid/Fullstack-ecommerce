@@ -142,7 +142,7 @@
             });
         </script>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            {% comment %} document.addEventListener('DOMContentLoaded', function () {
                 const categoryButtons = document.querySelectorAll('.category-button');
                 const itemsContainer = document.getElementById('items-container');
     
@@ -180,7 +180,7 @@
                             });
                     });
                 });
-            });
+            }); {% endcomment %}
         </script>
         <style>
             .scrollable-container {
