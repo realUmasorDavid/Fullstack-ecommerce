@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib import auth
 from django.contrib import messages
 from django.conf import settings
@@ -26,13 +27,26 @@ class UpdateCartQuantitiesView(View):
         return JsonResponse({'success': True})
 
 @login_required
+@require_POST
 def add_to_cart(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_item, created = CartItem.objects.get_or_create(product=product)
-    cart.items.add(cart_item)
-    messages.success(request, f'{cart_item} added to cart!')
-    return redirect('store')
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        product = get_object_or_404(Product, pk=pk)
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart_item, created = CartItem.objects.get_or_create(product=product)
+        cart.items.add(cart_item)
+
+        # Fetch the newly added cart item data
+        cart_item_data = {
+            'id': cart_item.id,
+            'name': cart_item.product.name,
+            'price': cart_item.product.price,
+            'quantity': cart_item.quantity,
+            'total': cart_item.total,
+            'image': cart_item.product.image.url
+        }
+
+        return JsonResponse({'success': True, 'message': f'{cart_item} added to cart!', 'cart_item': cart_item_data})
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
 
 @login_required
 def delete_item(request, pk):
@@ -41,12 +55,40 @@ def delete_item(request, pk):
     cart_item = get_object_or_404(CartItem, product=product)
     cart.items.remove(cart_item)
     messages.error(request, f'{cart_item} removed from cart!')
-    return redirect('store')
+    return redirect('initialize_payment')
 
-@login_required
-def view_cart(request):
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    return render(request, 'checkout.html', {'cart': cart})
+@require_GET
+def get_cart(request):
+    # Fetch the cart data for the current user
+    user = request.user
+    try:
+        cart = Cart.objects.get(user=user)
+        cart_data = {
+            'item_count': cart.item_count,
+            # Add other relevant cart data here
+        }
+        response = {
+            'success': True,
+            'cart': cart_data
+        }
+    except Cart.DoesNotExist:
+        response = {
+            'success': False,
+            'message': 'Cart not found'
+        }
+
+    return JsonResponse(response)
+
+# @login_required
+# def view_cart(request):
+#     cart, created = Cart.objects.get_or_create(user=request.user)
+#     cart_items = CartItem.objects.filter(cart=cart)
+
+#     context = {
+#         'cart_items': cart_items,
+#         'cart': cart,
+#     }
+#     return render(request, 'cart.html', context)
 
 @login_required
 def home(request):
@@ -153,12 +195,15 @@ def initialize_payment_view(request):
     if request.method == 'POST':
         location = request.POST.get('location')
         if not location:
-            return render(request, 'payments/initialize.html', {'error': 'Location is required'})
+            return render(request, 'cart.html', {'error': 'Location is required'})
 
         # Retrieve the user's cart
         cart = Cart.objects.get(user=request.user)
         cart_items = cart.items.all()
-        amount = cart.amount
+        cart_amount = cart.amount
+        delivery = cart.delivery
+        service_fee = cart.service_fee
+        amount = cart.subtotal
         email = request.user.email
         callback_url = request.build_absolute_uri('/payments/verify/')
 
@@ -167,7 +212,10 @@ def initialize_payment_view(request):
         if payment_data and 'reference' in payment_data:
             payment = Payment.objects.create(
                 user=request.user,
-                amount=amount,
+                amount=cart_amount,
+                delivery=delivery,
+                service_fee=service_fee,
+                total_amount=amount,
                 email=email,
                 reference=payment_data['reference'],
                 status='pending',
@@ -183,7 +231,7 @@ def initialize_payment_view(request):
             print(f"Order created: {order}")
             return redirect(payment_data['authorization_url'])
         else:
-            return render(request, 'payments/initialize.html', {'error': 'Payment initialization failed'})
+            return render(request, 'cart.html', {'error': 'Payment initialization failed'})
 
     cart = Cart.objects.get(user=request.user)
     cart_items = cart.items.all()
@@ -193,7 +241,7 @@ def initialize_payment_view(request):
         'amount': cart.amount,
         'email': request.user.email,
     }
-    return render(request, 'payments/initialize.html', context)
+    return render(request, 'cart.html', context)
 
 def verify_payment_view(request):
     reference = request.GET.get('reference')

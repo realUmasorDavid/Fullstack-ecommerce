@@ -53,6 +53,8 @@ class Cart(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(CartItem, blank=True)
+    delivery = models.IntegerField(default=400, null=True, blank=True)
+    service_fee = models.IntegerField(default=50, null=True, blank=True)
     status = models.CharField(max_length=50, default="pending", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
@@ -62,6 +64,9 @@ class Cart(models.Model):
     @property
     def amount(self):
         return sum(item.total for item in self.items.all())
+    @property
+    def subtotal(self):
+        return self.amount + self.delivery + self.service_fee
 
     def __str__(self):
         return f"{self.user.username}'s Cart"
@@ -71,6 +76,9 @@ class Payment(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.IntegerField()
+    delivery = models.IntegerField(default=400, null=True, blank=True)
+    service_fee = models.IntegerField(default=50, null=True, blank=True)
+    total_amount = models.IntegerField(null=True, blank=True)
     email = models.EmailField()
     reference = models.CharField(max_length=255)
     status = models.CharField(max_length=15, default="processing")
@@ -105,12 +113,12 @@ class OrderHistory(models.Model):
     status = models.CharField(
         max_length=50,
         choices=[
-            ('sent', 'Order Sent'),
-            ('received', 'Order Received'),
-            ('ready', 'Order Ready'),
-            ('delivered', 'Order Delivered'),
+            ('Sent', 'Order Sent'),
+            ('Received', 'Order Received'),
+            ('Ready', 'Order Ready'),
+            ('Delivered', 'Order Delivered'),
         ],
-        default='sent',
+        default='Sent',
     )
     rider = models.CharField(
         max_length=50,
@@ -118,7 +126,7 @@ class OrderHistory(models.Model):
             ('LCU Errands', 'lcu_errands'),
             ('Green Baba Delivery', 'greenbaba'),
         ],
-        default='none',
+        default='Not Picked',
     )
     delivered = models.BooleanField(default=None, blank=True, null=True)
     payment_date = models.DateTimeField(auto_now_add=True)
