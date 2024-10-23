@@ -266,7 +266,7 @@ def verify_payment_view(request):
                 user_order=", ".join([str(item) for item in cart_items]),
                 reference=payment.reference,
                 location=order.location,
-                total_price=cart.amount,
+                total_price=cart.subtotal,
                 payment=payment
             )
 
