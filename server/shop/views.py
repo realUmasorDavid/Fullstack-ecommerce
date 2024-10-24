@@ -13,6 +13,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.core.exceptions import ObjectDoesNotExist
 from .paystack import initialize_payment, verify_payment
 
 # Create your views here.
@@ -35,6 +36,20 @@ def add_to_cart(request, pk):
         cart_item, created = CartItem.objects.get_or_create(product=product)
         cart.items.add(cart_item)
 
+        # Check if the added product is a 'Main Meal'
+        if product.category.name == 'Main Meals':
+            try:
+                pack_product = Product.objects.get(name='Pack')
+                pack_in_cart = cart.items.filter(product=pack_product).exists()
+
+                if not pack_in_cart:
+                    cart_item_pack, created = CartItem.objects.get_or_create(product=pack_product, defaults={'quantity': 1})
+                    if created:
+                        cart.items.add(cart_item_pack)
+                        cart.save()
+            except Product.DoesNotExist:
+                pass  # Handle the case where 'Pack' product does not exist
+
         # Fetch the newly added cart item data
         cart_item_data = {
             'id': cart_item.id,
@@ -53,7 +68,29 @@ def delete_item(request, pk):
     product = get_object_or_404(Product, pk=pk)
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_item = get_object_or_404(CartItem, product=product)
+
+    # Check if the item being deleted is the 'Pack' product
+    if product.name == 'Pack':
+        main_meal_items = cart.items.filter(product__category__name='Main Meals')
+        if main_meal_items.exists():
+            messages.error(request, 'A Pack is required for your order.')
+            return redirect('initialize_payment')
+
     cart.items.remove(cart_item)
+
+    # Check if the removed product is a 'Main Meal'
+    if product.category.name == 'Main Meals':
+        main_meal_items = cart.items.filter(product__category__name='Main Meals')
+        if not main_meal_items.exists():
+            try:
+                pack_product = Product.objects.get(name='Pack')
+                pack_cart_item = get_object_or_404(CartItem, product=pack_product)
+                cart.items.remove(pack_cart_item)
+                pack_cart_item.delete()  # Also delete the CartItem associated with the 'Pack' product
+                cart.save()
+            except Product.DoesNotExist:
+                pass  # Handle the case where 'Pack' product does not exist
+
     messages.error(request, f'{cart_item} removed from cart!')
     return redirect('initialize_payment')
 
@@ -98,10 +135,11 @@ def home(request):
 def store(request):
     categories = Category.objects.all()
     selected_category = request.GET.get('category')
+
     if selected_category:
-        products = Product.objects.filter(category__name=selected_category)
+        products = Product.objects.filter(category__name=selected_category).exclude(name='Packaging')
     else:
-        products = Product.objects.all()
+        products = Product.objects.all().exclude(name='Pack')
 
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
@@ -189,7 +227,17 @@ def logout(request):
 
 def clear_user_cart(user):
     cart = Cart.objects.get(user=user)
+
+    # Delete all items in the cart
     cart.items.through.objects.filter(cart=cart).delete()
+
+    # Additionally, delete the 'Pack' product if it exists in the cart
+    try:
+        pack_product = Product.objects.get(name='Pack')
+        pack_cart_item = CartItem.objects.filter(product=pack_product, cart=cart)
+        pack_cart_item.delete()
+    except Product.DoesNotExist:
+        pass  # Handle the case where 'Pack' product does not exist
 
 def initialize_payment_view(request):
     if request.method == 'POST':
@@ -229,6 +277,7 @@ def initialize_payment_view(request):
                 location=location
             )
             print(f"Order created: {order}")
+                
             return redirect(payment_data['authorization_url'])
         else:
             return render(request, 'cart.html', {'error': 'Payment initialization failed'})
