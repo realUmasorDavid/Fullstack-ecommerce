@@ -4,12 +4,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
+from django.db.models import Sum, Count
 from django.contrib import auth
 from django.contrib import messages
 from django.conf import settings
 from .models import *
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -137,15 +138,15 @@ def store(request):
     selected_category = request.GET.get('category')
 
     if selected_category:
-        products = Product.objects.filter(category__name=selected_category).exclude(name='Packaging')
+        products = Product.objects.filter(category__name=selected_category, is_available=True).exclude(name='Packaging')
     else:
-        products = Product.objects.all().exclude(name='Pack')
+        products = Product.objects.filter(is_available=True).exclude(name='Pack')
 
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        products_data = list(products.values('id', 'name', 'price', 'image'))
+        products_data = list(products.values('id', 'name', 'price', 'image', 'is_available'))
         for product in products_data:
             product['image'] = request.build_absolute_uri(settings.MEDIA_URL + product['image'])
         return JsonResponse(products_data, safe=False)
@@ -159,6 +160,13 @@ def store(request):
     }
 
     return render(request, 'index.html', context)
+
+@require_POST
+def toggle_availability(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    product.is_available = not product.is_available
+    product.save()
+    return JsonResponse({'is_available': product.is_available})
 
 @login_required
 def profile(request):
@@ -320,6 +328,10 @@ def verify_payment_view(request):
             )
 
             for cart_item in cart_items:
+                product = cart_item.product
+                product.sales += cart_item.quantity
+                product.save()
+
                 cart_item.quantity = 1
                 cart_item.save()
 
@@ -353,5 +365,72 @@ def error_404(request, exception):
     data = {}
     return render(request,'errors/404.html', data)
 
+def error_403(request, *args, **argv):
+    return render(request, 'errors/403.html', status=403)
+
 def error_500(request, *args, **argv):
     return render(request, 'errors/500.html', status=500)
+
+def admin_dashboard(request):
+    
+    if not request.user.profile.is_staff:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
+    products = Product.objects.all()
+    orders = OrderHistory.objects.all().order_by('-payment_date')[:10]
+    total_sales = OrderHistory.objects.aggregate(total_sales=Sum('total_price'))['total_sales'] or 0
+
+    # Calculate total sales for each product
+    product_sales = OrderHistory.objects.values('user_order').annotate(total_sales=Sum('total_price'))
+
+    context = {
+        'products': products,
+        'orders': orders,
+        'total_sales': total_sales,
+        'product_sales': product_sales,
+    }
+
+    return render(request, 'secondary_admin.html', context)
+
+@login_required
+def rider_dashboard(request):
+    # Check if the user is a rider
+    if not request.user.profile.is_rider:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    # Fetch new orders
+    new_orders = OrderHistory.objects.filter(status='Sent')
+
+    # Fetch ongoing deliveries for the current user
+    ongoing_deliveries = OrderHistory.objects.filter(rider=request.user.username, delivered=None)
+
+    context = {
+        'user': request.user,  # Ensure the user object is passed to the template
+        'profile': request.user.profile,  # Pass the user's profile to the template
+        'new_orders': new_orders,
+        'ongoing_deliveries': ongoing_deliveries,
+    }
+
+    return render(request, 'order_admin.html', context)
+
+@require_POST
+def accept_order(request, order_id):
+    order = get_object_or_404(OrderHistory, id=order_id)
+    if order.status == 'Sent':
+        order.status = 'Ready'
+        order.rider = request.user.username
+        order.save()
+        return JsonResponse({'status': 'success', 'message': 'Order accepted successfully.'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Order cannot be accepted.'}, status=400)
+
+@require_POST
+def complete_order(request, order_id):
+    order = get_object_or_404(OrderHistory, id=order_id)
+    if order.status == 'Ready':
+        order.status = 'Delivered'
+        order.delivered = True
+        order.save()
+        return JsonResponse({'status': 'success', 'message': 'Order delivered successfully.'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Order not delivered.'}, status=400)

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Sidebar -->
+    <div class="flex flex-col lg:flex-row h-screen">
+        <aside class="hidden md:block w-full lg:w-64 bg-white p-4 shadow-lg lg:h-screen">
+            <div class="flex flex-col items-center mb-10">
+                <img src="https://via.placeholder.com/50" class="rounded-full" alt="Profile">
+                <h2 class="text-lg font-semibold mt-4">David Rose</h2>
+                <p class="text-gray-500">Manager</p>
+            </div>
+            <nav class="hidden md:block">
+                <ul>
+                    <li class="mb-4">
+                        <a href="#" class="flex items-center text-gray-700">
+                            <svg class="h-10" width="50px" height="50px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- SVG content here -->
+                            </svg>
+                            <span class="">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="#" class="flex items-center text-gray-700">
+                            <svg class="h-10" width="50px" height="50px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- SVG content here -->
+                            </svg>
+                            <span class="">Products</span>
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="#" class="flex items-center text-gray-700">
+                            <svg class="h-10" width="50px" height="50px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- SVG content here -->
+                            </svg>
+                            <span class="">Analytics</span>
+                        </a>
+                    </li>
+                    <li class="mb-4">
+                        <a href="#" class="flex items-center text-gray-700">
+                            <svg class="h-10" width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- SVG content here -->
+                            </svg>
+                            <span class="">Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Dashboard Area -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="md:text-2xl font-semibold">Dashboard</h1>
+                <div class="relative">
+                    <input type="text" placeholder="Search..." class="border rounded-lg p-2 pl-10 w-full md:w-auto">
+                    <span class="absolute left-2 top-3 text-gray-400 material-icons"><svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary" width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg></span>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-6 shadow rounded-lg">
+                    <h2 class="text-xl font-semibold">Total Orders</h2>
+                    <p class="text-3xl font-bold mt-2">{{ orders|length }}</p>
+                    <p class="text-green-500 mt-1">+11.01% vs last 7 days</p>
+                </div>
+                <div class="bg-white p-6 shadow rounded-lg">
+                    <h2 class="text-xl font-semibold">Total Sales</h2>
+                    <p class="text-3xl font-bold mt-2"><span class="font-bold">&#x20A6</span>{{ total_sales }}</p>
+                    <p class="text-green-500 mt-1">+11.01% vs last 7 days</p>
+                </div>
+                <div class="bg-white p-6 shadow rounded-lg">
+                    <h2 class="text-xl font-semibold">Revenue</h2>
+                    <p class="text-3xl font-bold mt-2"><span class="font-bold">&#x20A6</span>451K</p>
+                    <p class="text-green-500 mt-1">+15.01% vs last 7 days</p>
+                </div>
+            </section>
+
+            <!-- Product Listing and Sales Overview -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Product Selling -->
+                <div class="bg-white p-6 shadow rounded-lg col-span-2">
+                    <h2 class="text-xl font-semibold mb-4">Product Selling</h2>
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="pb-2">Product Name</th>
+                                <th class="pb-2">Price</th>
+                                <th class="pb-2 hidden md:block">Stock</th>
+                                <th class="pb-2">Total Sales</th>
+                                <th class="pb-2 hidden md:block">Restock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr class="border-b">
+                                <td class="py-2">{{ product.name }}</td>
+                                <td><span class="font-bold">&#x20A6</span>{{ product.price }}</td>
+                                {% if product.is_available %}
+                                    <td class="hidden md:block"><span class="bg-green-500 bg-opacity-20 text-green-800 text-sm border-2 border-gray-600 px-3 py-1 rounded-full">Available</span></td>
+                                    {% else %}
+                                    <td class="hidden md:block"><span class="bg-red-500 bg-opacity-20 text-red-800 text-sm border-2 border-red-700 px-3 py-1 rounded-full">Not Available</span></td>
+                                    {% endif %}
+                                <td>
+                                    {{ product.sales }}
+                                </td>
+                                <td class="hidden md:block">
+                                    {% if product.is_available %}
+                                    <button onclick="toggleAvailability({{ product.id }})" class="w-full bg-red-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Out of Stock?</button>
+                                    {% else %}
+                                    <button onclick="toggleAvailability({{ product.id }})" class="w-full bg-green-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Restock</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="bg-white w-[19rem] md:w-auto p-6 shadow rounded-lg">
+                    <h2 class="text-xl font-semibold mb-4">Recent Orders</h2>
+                    <ul>
+                        {% for order in orders %}
+                        <li class="mb-4">{{ order.user_order }} - <span class="font-bold">&#x20A6</span>{{ order.total_price }} <br>
+                        <span class="text-gray-500 text-sm">({{ order.payment_date }})</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Reports and Analytics -->
+            {% comment %} <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div class="bg-white p-6 shadow rounded-lg">
+                    <h2 class="text-xl font-semibold mb-4">Reports</h2>
+                    <div class="flex items-center justify-between">
+                        <p>24k Customers</p>
+                        <p>$250k Revenue</p>
+                    </div>
+                    <div class="mt-4">
+                        <img src="https://via.placeholder.com/300x100" alt="Reports Graph">
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 shadow rounded-lg">
+                    <h2 class="text-xl font-semibold mb-4">Customer by Country</h2>
+                    <img src="https://via.placeholder.com/300x100" alt="World Map">
+                </div>
+            </section> {% endcomment %}
+        </main>
+    </div>
+    <script>
+        function toggleAvailability(productId) {
+            fetch(`/toggle_availability/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const button = document.querySelector(`button[onclick="toggleAvailability(${productId})"]`);
+                if (data.is_available) {
+                    button.textContent = 'Restock';
+                    button.classList.remove('bg-red-500');
+                    button.classList.add('bg-green-500');
+                } else {
+                    button.textContent = 'Out of Stock';
+                    button.classList.remove('bg-green-500');
+                    button.classList.add('bg-red-500');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

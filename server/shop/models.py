@@ -7,10 +7,12 @@ from django.dispatch import receiver
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
+    is_rider = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
-    
+
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
@@ -33,7 +35,8 @@ class Product(models.Model):
     description = models.TextField()
     image = models.ImageField(upload_to="Product_Image")
     price = models.FloatField()
-    quantity = models.IntegerField()
+    sales = models.IntegerField(null=True, blank=True)
+    is_available = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
         return self.name

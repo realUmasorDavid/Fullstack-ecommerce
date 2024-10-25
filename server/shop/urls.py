@@ -19,4 +19,9 @@ urlpatterns = [
     path('payment/success/', views.payment_success, name='payment_success'),
     path('order', views.order_history, name='order_history'),
     path('order/<int:order_id>/', views.order_details, name='order_details'),
+    path('secondary_admin', views.admin_dashboard, name='admin_dashboard'),
+    path('toggle_availability/<int:product_id>/', views.toggle_availability, name='toggle_availability'),
+    path('order_admin', views.rider_dashboard, name='order_admin'),
+    path('accept_order/<int:order_id>/', views.accept_order, name='accept_order'),
+    path('complete_order/<int:order_id>/', views.complete_order, name='complete_order'),
 ]

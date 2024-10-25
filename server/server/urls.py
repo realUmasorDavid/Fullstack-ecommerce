@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls import handler404, handler500
 
+handler403 = 'shop.views.error_403'
 handler404 = 'shop.views.error_404'
 handler500 = 'shop.views.error_500'
 
