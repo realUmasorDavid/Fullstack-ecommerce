@@ -5,6 +5,7 @@ from .views import UpdateCartQuantitiesView
 urlpatterns = [
     path('', views.home, name='home'),
     path('store', views.store, name='store'),
+    path('search/', views.search_products, name='search_products'),
     path('profile', views.profile, name='update_profile'),
     path('checkout', views.checkout, name='checkout'),
     path('signup', views.signup, name='signup'),

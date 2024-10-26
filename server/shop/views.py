@@ -161,6 +161,25 @@ def toggle_availability(request, product_id):
 
     return JsonResponse(response_data)
 
+def search_products(request):
+    query = request.GET.get('query', '')
+    if query:
+        products = Product.objects.filter(name__icontains=query, is_available=True)
+    else:
+        products = Product.objects.filter(is_available=True).exclude(name='Pack')
+
+    products_data = [
+        {
+            'id': product.id,
+            'name': product.name,
+            'price': product.price,
+            'image': product.image.url,
+            'is_available': product.is_available
+        }
+        for product in products
+    ]
+    return JsonResponse(products_data, safe=False)
+
 @login_required
 def profile(request):
     user = request.user
