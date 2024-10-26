@@ -5,39 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rider Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --theme-color: #e78e2a;
+        }
+        .bg-theme-color {
+            background-color: var(--theme-color);
+        }
+        .text-theme-color {
+            color: var(--theme-color);
+        }
+        .border-theme-color {
+            border-color: var(--theme-color);
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 text-gray-800">
     <!-- Sidebar -->
     <div class="flex flex-col md:flex-row h-screen">
         <aside class="w-full md:w-64 bg-white p-4 shadow-lg md:h-full">
             <div class="flex flex-col items-center mb-10">
                 <img src="https://via.placeholder.com/50" class="rounded-full" alt="Profile">
-                <h2 class="text-lg font-semibold mt-4">{{ user.first_name }} {{ user.last_name }}</h2>
+                <h2 class="text-lg font-semibold mt-4 text-theme-color">{{ user.first_name }} {{ user.last_name }}</h2>
                 <p class="text-gray-500">Delivery Rider</p>
             </div>
             <nav class="hidden md:block">
                 <ul>
                     <li class="mb-4">
-                        <a href="#" class="flex items-center text-gray-700">
-                            <span class="material-icons">dashboard</span>
+                        <a href="#" class="flex items-center text-gray-700 hover:text-theme-color">
+                            <span class="material-icons text-theme-color">dashboard</span>
                             <span class="ml-3">Dashboard</span>
                         </a>
                     </li>
                     <li class="mb-4">
-                        <a href="#" class="flex items-center text-gray-700">
-                            <span class="material-icons">delivery_dining</span>
+                        <a href="#" class="flex items-center text-gray-700 hover:text-theme-color">
+                            <span class="material-icons text-theme-color">delivery_dining</span>
                             <span class="ml-3">Orders</span>
                         </a>
                     </li>
                     <li class="mb-4">
-                        <a href="#" class="flex items-center text-gray-700">
-                            <span class="material-icons">history</span>
+                        <a href="#" class="flex items-center text-gray-700 hover:text-theme-color">
+                            <span class="material-icons text-theme-color">history</span>
                             <span class="ml-3">Order History</span>
                         </a>
                     </li>
                     <li class="mb-4">
-                        <a href="#" class="flex items-center text-gray-700">
-                            <span class="material-icons">settings</span>
+                        <a href="#" class="flex items-center text-gray-700 hover:text-theme-color">
+                            <span class="material-icons text-theme-color">settings</span>
                             <span class="ml-3">Settings</span>
                         </a>
                     </li>
@@ -46,10 +60,11 @@
         </aside>
 
         <!-- Main Dashboard Area -->
-        <main class="flex-1 p-6 md:ml-64">
-            <header class="flex justify-between items-center mb-6">
-                <h1 class="md:text-2xl font-semibold">Rider Dashboard</h1>
-                <div class="relative">
+        <main class="flex-1 p-6 md:ml-4">
+            <header class="flex justify-between items-center">
+                <img src="/static/marrigoldblack.png" class="w-28 md:-mr-[30rem]" alt="Logo" />
+                <h1 class="md:text-2xl font-semibold -mt-2 mr-[28rem] md:mr-0 text-theme-color">Staff Dashboard</h1>
+                <div class="hidden md:block relative -mt-2">
                     <input type="text" placeholder="Search..." class="border rounded-lg p-2 pl-10 w-full md:w-auto">
                     <span class="absolute left-2 top-3 text-gray-400 material-icons"><svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary" width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -60,12 +75,12 @@
             <!-- Rider Status -->
             <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div class="bg-white p-6 shadow rounded-lg">
-                    <h2 class="text-xl font-semibold">Active Orders</h2>
+                    <h2 class="text-xl font-semibold text-theme-color">Active Orders</h2>
                     <p class="text-3xl font-bold mt-2">{{ new_orders|length }}</p>
                     <p class="text-green-500 mt-1">Ongoing Deliveries</p>
                 </div>
                 <div class="bg-white p-6 shadow rounded-lg">
-                    <h2 class="text-xl font-semibold">Earnings Today</h2>
+                    <h2 class="text-xl font-semibold text-theme-color">Earnings Today</h2>
                     <p class="text-3xl font-bold mt-2">$250</p>
                     <p class="text-green-500 mt-1">+15% increase from yesterday</p>
                 </div>
@@ -73,7 +88,7 @@
 
             <!-- Orders List -->
             <section class="bg-white p-6 shadow rounded-lg mb-6">
-                <h2 class="text-xl font-semibold mb-4">New Orders</h2>
+                <h2 class="text-xl font-semibold mb-4 text-theme-color">New Orders</h2>
                 <table class="w-full text-left">
                     <thead>
                         <tr class="border-b">
@@ -111,7 +126,7 @@
 
             <!-- Current Deliveries -->
             <section class="bg-white p-6 shadow rounded-lg">
-                <h2 class="text-xl font-semibold mb-4">Ongoing Deliveries</h2>
+                <h2 class="text-xl font-semibold mb-4 text-theme-color">Ongoing Deliveries</h2>
                 <ul>
                     {% for order in ongoing_deliveries %}
                     <li class="flex flex-col md:flex-row justify-between mb-4 p-4 bg-gray-50 rounded shadow">
@@ -120,7 +135,12 @@
                             <h4 class="text-lg">Order: {{ order.user_order }}</h4>
                             <p>Pickup: Marrigold</p>
                             <p>Dropoff: {{ order.location }}</p>
-                            <p>Dropoff: {{ order.total_price }}</p>
+                            <p>Price: {{ order.total_price }}</p>
+                            {% if order.payment_method == 'paystack' %}
+                                <p>Payment Method: Online</p>
+                            {% else %}
+                                <p>Payment Method: Physical</p>
+                            {% endif %}
                         </div>
                         <div class="done mt-4 md:mt-0">
                             <button onclick="completeOrder({{ order.id }})" class="bg-green-500 text-white px-4 py-2 rounded">Complete</button>

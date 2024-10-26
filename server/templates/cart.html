@@ -111,7 +111,13 @@
                     {% if error %}
                         <p class="text-red-500 my-2">{{ error }}</p>
                     {% endif %}
-    
+                    
+                    <label for="payment_method">Payment Method:</label>
+                    <select id="payment_method" name="payment_method" required class="mb-4 p-2 border border-gray-300 rounded">
+                        <option value="paystack">Paystack</option>
+                        <option value="cash">Pay on Delivery</option>
+                    </select>
+
                     <button type="submit" class="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-opacity-80 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100">
                         <svg class="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />

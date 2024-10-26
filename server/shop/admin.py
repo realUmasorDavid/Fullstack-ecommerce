@@ -37,7 +37,7 @@ class CartAdmin(admin.ModelAdmin):
 
 class PaymentAdmin(admin.ModelAdmin):
     inlines = [CartItemInline2]
-    list_display = ('user', 'amount', 'email', 'reference', 'items_display', 'status', 'date')
+    list_display = ('user', 'amount', 'email', 'reference', 'items_display', 'payment_method', 'status', 'date')
     search_fields = ('id', 'reference', 'user__username', 'email')
     readonly_fields = ('user', 'amount', 'email', 'reference', 'items_display', 'status', 'date')
     
@@ -48,12 +48,12 @@ class PaymentAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'cart', 'payment', 'delivered', 'status', 'created_at')
+    list_display = ('id', 'user', 'cart', 'payment', 'payment_method', 'delivered', 'status', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('user', 'cart__id', 'payment__id')
     
 class OrderHistoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'user_order', 'phone_number', 'location', 'total_price', 'status', 'rider', 'delivered', 'payment_date')
+    list_display = ('id', 'user', 'user_order', 'phone_number', 'location', 'total_price', 'payment_method', 'status', 'rider', 'delivered', 'payment_date')
     list_filter = ('status', 'delivered', 'rider', 'location', 'payment_date')
     search_fields = ('user__username', 'status', 'delivered')
     readonly_fields = ('id', 'user', 'total_price', 'location', 'payment_date')

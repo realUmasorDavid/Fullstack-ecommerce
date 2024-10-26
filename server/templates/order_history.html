@@ -161,6 +161,9 @@
                                 Order Status
                             </th>
                             <th scope="col" class="px-6 py-3">
+                                Payment Method
+                            </th>
+                            <th scope="col" class="px-6 py-3">
                                 Reference ID
                             </th>
                             <th scope="col" class="px-6 py-3">
@@ -191,6 +194,15 @@
                             <td class="px-6 py-4">
                                 {{ order.status }}
                             </td>
+                            {% if order.payment_method == 'paystack' %}
+                            <td class="px-6 py-4">
+                                Online
+                            </td>
+                            {% else %}
+                            <td class="px-6 py-4">
+                                Physical
+                            </td>
+                            {% endif %}
                             <td class="px-6 py-4">
                                 {{ order.reference }} 
                             </td>

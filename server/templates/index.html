@@ -34,6 +34,12 @@
             overflow-x: auto; /* Enable horizontal scrolling */
             white-space: nowrap; /* Prevent wrapping of content */
             -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }   
+
+        .category-button.active {
+            background-color: transparent;
+            color: #e78e2a; /* Primary color */
+            border: 2px solid #e78e2a; /* Primary color */
         }
     </style>
 </head>
@@ -182,13 +188,13 @@
 
     <!-- Category Filter Buttons -->
     <div class="mt-4 mx-4 md:mx-16 flex space-x-4 scrollable-container">
-        <button class="category-button bg-primary text-white px-4 py-2 rounded" data-category="">All</button>
+        <button class="category-button bg-primary text-white px-4 py-2 focus:ring-inset focus:bg-transparent focus:text-primary ring-primary rounded active" data-category="">All</button>
         {% for category in categories %}
             {% if category.name != 'Packaging' %}
-                <button class="category-button bg-primary text-white px-4 py-2 rounded" data-category="{{ category.name }}">{{ category.name }}</button>
+                <button class="category-button bg-primary text-white px-4 py-2 focus:ring-inset focus:bg-transparent focus:text-primary ring-primary rounded" data-category="{{ category.name }}">{{ category.name }}</button>
             {% endif %}
         {% endfor %}
-    </div>
+    </div>    
 
     <!-- Product Card  -->
     <div class="bg-white">
@@ -224,9 +230,14 @@
         document.addEventListener('DOMContentLoaded', function () {
             const categoryButtons = document.querySelectorAll('.category-button');
             const itemsContainer = document.getElementById('items-container');
-        
+    
             categoryButtons.forEach(button => {
                 button.addEventListener('click', function () {
+                    // Remove active class from all buttons
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to the clicked button
+                    this.classList.add('active');
+    
                     const category = this.getAttribute('data-category');
                     fetch(`/store?category=${category}`, {
                         headers: {
@@ -247,9 +258,9 @@
                                             <div class="flex align-middle items-center justify-between">
                                                 <div>
                                                     <h3 class="mt-4 text-sm text-gray-700">${product.name}</h3>
-                                                    <p class="mt-1 text-lg font-medium text-gray-900"><span class="font-bold">&#x20A6</span> ${product.price}</p>
+                                                    <p class="mt-1 text-lg font-medium text-gray-900"><span class="font-bold">&#x20A6</span> ${product.price}.0</p>
                                                 </div>
-                                                <form id="addToCartForm-${product.id}" action="/add_to_cart/${product.id}/" method="post" style="display:inline;">
+                                                <form id="add-to-cart-form-${product.id}" action="/add_to_cart/${product.id}/" method="post" style="display:inline;">
                                                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                                     <button type="submit" data-id="${product.id}" class="add-to-cart px-2 py-1.5 text-sm bg-primary text-white h-1/2 mt-4 rounded-lg">Add to Cart</button>
                                                 </form>
@@ -259,48 +270,64 @@
                                     itemsContainer.innerHTML += productCard;
                                 }
                             });
+                            // Re-attach event listeners to the newly added forms
+                            attachEventListeners();
                         });
                 });
             });
-        });
-        
-
-        $(document).ready(function() {
-            $('[id^="add-to-cart-form-"]').on('submit', function(event) {
-                event.preventDefault();
-        
-                // Log form submission
-                console.log('Form submitted');
-        
-                $.ajax({
-                    type: 'POST',
-                    url: $(this).attr('action'),
-                    data: $(this).serialize(),
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    success: function(response) {
-                        // Log the response for debugging
-                        console.log('Response:', response);
-        
-                        if (response.success) {
-                            // Show success toast
-                            Toastify({
-                                text: response.message,
-                                duration: 2000,
-                                close: true,
-                                gravity: "bottom",
-                                position: "right",
-                                backgroundColor: "#00ff00",
-                                stopOnFocus: true,
-                            }).showToast();
-        
-                            // Fetch the updated cart data
-                            fetchCartData();
-                        } else {
+    
+            function attachEventListeners() {
+                $('[id^="add-to-cart-form-"]').off('submit').on('submit', function(event) {
+                    event.preventDefault();
+    
+                    // Log form submission
+                    console.log('Form submitted');
+    
+                    $.ajax({
+                        type: 'POST',
+                        url: $(this).attr('action'),
+                        data: $(this).serialize(),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(response) {
+                            // Log the response for debugging
+                            console.log('Response:', response);
+    
+                            if (response.success) {
+                                // Show success toast
+                                Toastify({
+                                    text: response.message,
+                                    duration: 2000,
+                                    close: true,
+                                    gravity: "bottom",
+                                    position: "right",
+                                    backgroundColor: "#00ff00",
+                                    stopOnFocus: true,
+                                }).showToast();
+    
+                                // Fetch the updated cart data
+                                fetchCartData();
+                            } else {
+                                // Show error toast
+                                Toastify({
+                                    text: response.message,
+                                    duration: 2000,
+                                    close: true,
+                                    gravity: "bottom",
+                                    position: "right",
+                                    backgroundColor: "#ff0000",
+                                    stopOnFocus: true,
+                                }).showToast();
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            // Log the error for debugging
+                            console.error('Error:', error);
+    
                             // Show error toast
                             Toastify({
-                                text: response.message,
+                                text: 'An error occurred: ' + error,
                                 duration: 2000,
                                 close: true,
                                 gravity: "bottom",
@@ -309,25 +336,10 @@
                                 stopOnFocus: true,
                             }).showToast();
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        // Log the error for debugging
-                        console.error('Error:', error);
-        
-                        // Show error toast
-                        Toastify({
-                            text: 'An error occurred: ' + error,
-                            duration: 2000,
-                            close: true,
-                            gravity: "bottom",
-                            position: "right",
-                            backgroundColor: "#ff0000",
-                            stopOnFocus: true,
-                        }).showToast();
-                    }
+                    });
                 });
-            });
-        
+            }
+    
             function fetchCartData() {
                 $.ajax({
                     type: 'GET',
@@ -335,7 +347,7 @@
                     success: function(cartResponse) {
                         // Log the cart response for debugging
                         console.log('Cart Response:', cartResponse);
-        
+    
                         // Check if cartResponse.cart is defined and has item_count
                         if (cartResponse.cart && cartResponse.cart.item_count !== undefined) {
                             $('#quantity').text(cartResponse.cart.item_count);
@@ -346,7 +358,7 @@
                     error: function(xhr, status, error) {
                         // Log the error for debugging
                         console.error('Error fetching cart data:', error);
-        
+    
                         // Show error toast
                         Toastify({
                             text: 'An error occurred while fetching cart data: ' + error,
@@ -360,9 +372,13 @@
                     }
                 });
             }
+    
+            // Attach event listeners to the initial forms
+            attachEventListeners();
         });
-                        
     </script>
+    
+    
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 

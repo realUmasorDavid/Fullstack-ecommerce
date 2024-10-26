@@ -250,8 +250,13 @@ def clear_user_cart(user):
 def initialize_payment_view(request):
     if request.method == 'POST':
         location = request.POST.get('location')
+        payment_method = request.POST.get('payment_method')
+
         if not location:
             return render(request, 'cart.html', {'error': 'Location is required'})
+
+        if not payment_method:
+            return render(request, 'cart.html', {'error': 'Payment method is required'})
 
         # Retrieve the user's cart
         cart = Cart.objects.get(user=request.user)
@@ -261,11 +266,36 @@ def initialize_payment_view(request):
         service_fee = cart.service_fee
         amount = cart.subtotal
         email = request.user.email
-        callback_url = request.build_absolute_uri('/payments/verify/')
 
-        payment_data = initialize_payment(amount, email, callback_url)
+        if payment_method == 'paystack':
+            callback_url = request.build_absolute_uri('/payments/verify/')
+            payment_data = initialize_payment(amount, email, callback_url)
 
-        if payment_data and 'reference' in payment_data:
+            if payment_data and 'reference' in payment_data:
+                payment = Payment.objects.create(
+                    user=request.user,
+                    amount=cart_amount,
+                    delivery=delivery,
+                    service_fee=service_fee,
+                    total_amount=amount,
+                    email=email,
+                    reference=payment_data['reference'],
+                    status='pending',
+                    payment_method='paystack',
+                    order_id=cart
+                )
+                order = Order.objects.create(
+                    user=request.user,
+                    cart=", ".join([str(item) for item in cart_items]),
+                    payment=payment,
+                    status='pending',
+                    payment_method='paystack',
+                    location=location
+                )
+                return redirect(payment_data['authorization_url'])
+            else:
+                return render(request, 'cart.html', {'error': 'Payment initialization failed'})
+        elif payment_method == 'cash':
             payment = Payment.objects.create(
                 user=request.user,
                 amount=cart_amount,
@@ -273,22 +303,46 @@ def initialize_payment_view(request):
                 service_fee=service_fee,
                 total_amount=amount,
                 email=email,
-                reference=payment_data['reference'],
                 status='pending',
+                payment_method='cash',
                 order_id=cart
             )
             order = Order.objects.create(
                 user=request.user,
                 cart=", ".join([str(item) for item in cart_items]),
                 payment=payment,
-                status='completed',
+                payment_method='cash',
+                status='pending',
                 location=location
             )
-            print(f"Order created: {order}")
+            
+            order_history = OrderHistory.objects.create(
+                user=request.user,
+                user_order=", ".join([str(item) for item in cart_items]),
+                reference=payment.reference,
+                payment_method='cash',
+                location=order.location,
+                total_price=cart.subtotal,
+                payment=payment
+            )
+
+            for cart_item in cart_items:
+                product = cart_item.product
+                product.sales += cart_item.quantity
+                product.save()
+
+                cart_item.quantity = 1
+                cart_item.save()
                 
-            return redirect(payment_data['authorization_url'])
-        else:
-            return render(request, 'cart.html', {'error': 'Payment initialization failed'})
+            try:
+                pack_product = Product.objects.get(name='Pack')
+                pack_cart_item = get_object_or_404(CartItem, product=pack_product)
+                pack_cart_item.delete()
+            except Product.DoesNotExist:
+                pass  # Handle the case where 'Pack' product does not exist
+
+            clear_user_cart(request.user)
+            return redirect('payment_success')
 
     cart = Cart.objects.get(user=request.user)
     cart_items = cart.items.all()
@@ -324,6 +378,7 @@ def verify_payment_view(request):
                 reference=payment.reference,
                 location=order.location,
                 total_price=cart.subtotal,
+                payment_method='paystack',
                 payment=payment
             )
 
@@ -334,6 +389,13 @@ def verify_payment_view(request):
 
                 cart_item.quantity = 1
                 cart_item.save()
+                
+            try:
+                pack_product = Product.objects.get(name='Pack')
+                pack_cart_item = get_object_or_404(CartItem, product=pack_product)
+                pack_cart_item.delete()
+            except Product.DoesNotExist:
+                pass  # Handle the case where 'Pack' product does not exist
 
             clear_user_cart(request.user)
 
@@ -384,6 +446,7 @@ def admin_dashboard(request):
     product_sales = OrderHistory.objects.values('user_order').annotate(total_sales=Sum('total_price'))
 
     context = {
+        'user': request.user,  # Ensure the user object is passed to the template
         'products': products,
         'orders': orders,
         'total_sales': total_sales,

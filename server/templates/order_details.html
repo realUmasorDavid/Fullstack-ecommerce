@@ -64,6 +64,14 @@
                     <p>{{ order.payment_date }}</p>
                 </div>
                 <div>
+                    <p class="font-bold">Payment Method:</p>
+                    {% if order.payment_method == 'paystack' %}
+                        <p>Online</p>
+                    {% else %}
+                        <p>Physical</p>
+                    {% endif %}
+                </div>
+                <div>
                     <p class="font-bold">Rider:</p>
                     {% if order.rider == 'none' %}
                         <p>Order hasn't been accepted</p>
