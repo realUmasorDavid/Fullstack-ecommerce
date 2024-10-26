@@ -1,20 +1,19 @@
 # views.py
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Sum, Count
-from django.contrib import auth
-from django.contrib import messages
+from django.contrib import auth, messages
 from django.conf import settings
 from .models import *
 import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from django.views import View
-from django.core.exceptions import ObjectDoesNotExist
 from .paystack import initialize_payment, verify_payment
 
 # Create your views here.
@@ -37,7 +36,7 @@ def add_to_cart(request, pk):
         cart_item, created = CartItem.objects.get_or_create(product=product)
         cart.items.add(cart_item)
 
-        # Check if the added product is a 'Main Meal'
+        # Check if the added product is under 'Main Meal' category
         if product.category.name == 'Main Meals':
             try:
                 pack_product = Product.objects.get(name='Pack')
@@ -49,7 +48,7 @@ def add_to_cart(request, pk):
                         cart.items.add(cart_item_pack)
                         cart.save()
             except Product.DoesNotExist:
-                pass  # Handle the case where 'Pack' product does not exist
+                pass  # Handle a case where 'Pack' product does not exist
 
         # Fetch the newly added cart item data
         cart_item_data = {
@@ -87,7 +86,7 @@ def delete_item(request, pk):
                 pack_product = Product.objects.get(name='Pack')
                 pack_cart_item = get_object_or_404(CartItem, product=pack_product)
                 cart.items.remove(pack_cart_item)
-                pack_cart_item.delete()  # Also delete the CartItem associated with the 'Pack' product
+                pack_cart_item.delete()  # Also delete the 'Pack' CartItem product
                 cart.save()
             except Product.DoesNotExist:
                 pass  # Handle the case where 'Pack' product does not exist
@@ -97,13 +96,12 @@ def delete_item(request, pk):
 
 @require_GET
 def get_cart(request):
-    # Fetch the cart data for the current user
+    # Fetch the cart of the current user
     user = request.user
     try:
         cart = Cart.objects.get(user=user)
         cart_data = {
             'item_count': cart.item_count,
-            # Add other relevant cart data here
         }
         response = {
             'success': True,
@@ -116,17 +114,6 @@ def get_cart(request):
         }
 
     return JsonResponse(response)
-
-# @login_required
-# def view_cart(request):
-#     cart, created = Cart.objects.get_or_create(user=request.user)
-#     cart_items = CartItem.objects.filter(cart=cart)
-
-#     context = {
-#         'cart_items': cart_items,
-#         'cart': cart,
-#     }
-#     return render(request, 'cart.html', context)
 
 @login_required
 def home(request):
@@ -166,7 +153,13 @@ def toggle_availability(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     product.is_available = not product.is_available
     product.save()
-    return JsonResponse({'is_available': product.is_available})
+    
+    response_data = {
+            'is_available': product.is_available,
+            'name': product.name,
+        }
+
+    return JsonResponse(response_data)
 
 @login_required
 def profile(request):
@@ -239,7 +232,7 @@ def clear_user_cart(user):
     # Delete all items in the cart
     cart.items.through.objects.filter(cart=cart).delete()
 
-    # Additionally, delete the 'Pack' product if it exists in the cart
+    # Delete the 'Pack' product in the CartItem
     try:
         pack_product = Product.objects.get(name='Pack')
         pack_cart_item = CartItem.objects.filter(product=pack_product, cart=cart)
@@ -258,7 +251,7 @@ def initialize_payment_view(request):
         if not payment_method:
             return render(request, 'cart.html', {'error': 'Payment method is required'})
 
-        # Retrieve the user's cart
+        # Get the user's cart
         cart = Cart.objects.get(user=request.user)
         cart_items = cart.items.all()
         cart_amount = cart.amount
@@ -395,7 +388,7 @@ def verify_payment_view(request):
                 pack_cart_item = get_object_or_404(CartItem, product=pack_product)
                 pack_cart_item.delete()
             except Product.DoesNotExist:
-                pass  # Handle the case where 'Pack' product does not exist
+                pass  # Handle the cart where 'Pack' product does not exist
 
             clear_user_cart(request.user)
 
@@ -434,25 +427,41 @@ def error_500(request, *args, **argv):
     return render(request, 'errors/500.html', status=500)
 
 def admin_dashboard(request):
-    
+    # Check if the user has staff permissions
     if not request.user.profile.is_staff:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
+    # Get all products
     products = Product.objects.all()
+
+    # Get the latest 10 orders, ordered by payment date in descending order
+    all_orders = OrderHistory.objects.all()
     orders = OrderHistory.objects.all().order_by('-payment_date')[:10]
+
+    # Get the current date
+    today = timezone.now().date()
+
+    # Calculate total sales for the current day
+    today_sales = OrderHistory.objects.filter(payment_date__date=today).aggregate(total=Sum('total_price'))['total'] or 0
+
+    # Calculate total sales for all time
     total_sales = OrderHistory.objects.aggregate(total_sales=Sum('total_price'))['total_sales'] or 0
 
     # Calculate total sales for each product
     product_sales = OrderHistory.objects.values('user_order').annotate(total_sales=Sum('total_price'))
 
+    # Prepare the context dictionary to pass to the template
     context = {
-        'user': request.user,  # Ensure the user object is passed to the template
+        'user': request.user,
         'products': products,
+        'all_orders': all_orders,
         'orders': orders,
+        'today_sales': today_sales,
         'total_sales': total_sales,
         'product_sales': product_sales,
     }
 
+    # Render the template with the context data
     return render(request, 'secondary_admin.html', context)
 
 @login_required
@@ -466,10 +475,14 @@ def rider_dashboard(request):
 
     # Fetch ongoing deliveries for the current user
     ongoing_deliveries = OrderHistory.objects.filter(rider=request.user.username, delivered=None)
+    
+    today = timezone.now().date()
+    today_sales = OrderHistory.objects.filter(payment_date__date=today).aggregate(total=Sum('total_price'))['total'] or 0
 
     context = {
-        'user': request.user,  # Ensure the user object is passed to the template
-        'profile': request.user.profile,  # Pass the user's profile to the template
+        'user': request.user,
+        'profile': request.user.profile,
+        'today_sales': today_sales,
         'new_orders': new_orders,
         'ongoing_deliveries': ongoing_deliveries,
     }

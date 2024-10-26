@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-commerce Dashboard</title>
+    <title>Marrigold Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Include Toastify JavaScript -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
         :root {
             --theme-color: #e78e2a;
@@ -19,58 +23,212 @@
             border-color: var(--theme-color);
         }
     </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#e78e2a',
+                        secondary: '#FEFEFF',
+                    },
+                    fontFamily: {
+                        Poppins: ["Poppins", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
 </head>
 <body class="bg-gray-100 text-gray-800">
     <!-- Sidebar -->
     <div class="flex flex-col lg:flex-row h-screen">
-        <aside class="hidden md:block w-full lg:w-64 bg-white p-4 shadow-lg lg:h-screen">
-            <div class="flex flex-col items-center mb-10">
-                <img src="https://via.placeholder.com/50" class="rounded-full" alt="Profile">
-                <h2 class="text-lg font-semibold mt-4 text-theme-color">{{user.first_name}} {{user.last_name}}</h2>
-                <p class="text-gray-500">Manager</p>
-            </div>
-            <nav class="hidden md:block">
-                <ul>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center text-gray-700 hover:text-theme-color">
-                            <svg class="h-6 w-6 mr-2 text-theme-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10"/>
+        
+
+<aside id="default-sidebar"
+            class="fixed top-0 left-0 z-40 w-full sm:w-80 h-screen transition-transform -translate-x-full"
+            aria-label="Sidebar">
+            <div class="h-full px-3 py-4 overflow-y-auto bg-primary dark:bg-primary">
+                <div class="flex items-center justify-between -mt-6">
+                    <a href="/">
+                        <h1 class="mx-2 my-8 text-white text-xl">Marrigold</h1>
+                    </a>
+                    <button onclick="openMenu()" class="mr-5 w-2 h-1/6 mt-1">
+                        <svg width="20px" height="20px" viewBox="0 0 24 24" fill="#fff"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M20.7457 3.32851C20.3552 2.93798 19.722 2.93798 19.3315 3.32851L12.0371 10.6229L4.74275 3.32851C4.35223 2.93798 3.71906 2.93798 3.32854 3.32851C2.93801 3.71903 2.93801 4.3522 3.32854 4.74272L10.6229 12.0371L19.3315 20.7457C19.722 21.1362 20.3552 21.1362 20.7457 20.7457C21.1362 20.3551 21.1362 19.722 20.7457 19.3315L13.4513 12.0371L20.7457 4.74272C21.1362 4.3522 21.1362 3.71903 20.7457 3.32851Z"
+                                fill="#fff" />
+                        </svg>
+                    </button>
+                </div>
+                <ul class="pt-8 space-y-6 font-medium">
+                    <li>
+                        <a href="/profile"
+                            class="flex items-center p-2 text-white rounded-lg hover:bg-white hover:text-primary group duration-500">
+                            <svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary"
+                                aria-hidden="true" width="800px" height="800px" xmlns="http://www.w3.org/2000/svg"
+                                fill="currentColor" viewBox="0 0 20 20">
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -2159.000000)"
+                                        fill="currentColor">
+                                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                                            <path
+                                                d="M100.562548,2016.99998 L87.4381713,2016.99998 C86.7317804,2016.99998 86.2101535,2016.30298 86.4765813,2015.66198 C87.7127655,2012.69798 90.6169306,2010.99998 93.9998492,2010.99998 C97.3837885,2010.99998 100.287954,2012.69798 101.524138,2015.66198 C101.790566,2016.30298 101.268939,2016.99998 100.562548,2016.99998 M89.9166645,2004.99998 C89.9166645,2002.79398 91.7489936,2000.99998 93.9998492,2000.99998 C96.2517256,2000.99998 98.0830339,2002.79398 98.0830339,2004.99998 C98.0830339,2007.20598 96.2517256,2008.99998 93.9998492,2008.99998 C91.7489936,2008.99998 89.9166645,2007.20598 89.9166645,2004.99998 M103.955674,2016.63598 C103.213556,2013.27698 100.892265,2010.79798 97.837022,2009.67298 C99.4560048,2008.39598 100.400241,2006.33098 100.053171,2004.06998 C99.6509769,2001.44698 97.4235996,1999.34798 94.7348224,1999.04198 C91.0232075,1998.61898 87.8750721,2001.44898 87.8750721,2004.99998 C87.8750721,2006.88998 88.7692896,2008.57398 90.1636971,2009.67298 C87.1074334,2010.79798 84.7871636,2013.27698 84.044024,2016.63598 C83.7745338,2017.85698 84.7789973,2018.99998 86.0539717,2018.99998 L101.945727,2018.99998 C103.221722,2018.99998 104.226185,2017.85698 103.955674,2016.63598"
+                                                id="profile_round-[#1342]">
+    
+                                            </path>
+                                        </g>
+                                    </g>
+                                </g>
                             </svg>
-                            <span class="">Dashboard</span>
+                            <span class="ms-3">Profile</span>
                         </a>
                     </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center text-gray-700 hover:text-theme-color">
-                            <svg class="h-6 w-6 mr-2 text-theme-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    <li>
+                        <a href="/"
+                            class="flex items-center p-2 text-white rounded-lg hover:bg-white hover:text-primary group duration-500">
+                            <svg class="w-6 h-6 text-white transition duration-75 group-hover:text-primary"
+                                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="transparent"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M13 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.0799 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.0799 19 6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V13M3 8L8.45036 11.6336C9.73296 12.4886 10.3743 12.9162 11.0674 13.0824C11.6804 13.2293 12.3196 13.2293 12.9326 13.0824C13.6257 12.9162 14.267 12.4886 15.5496 11.6336M22 6.5C22 7.88071 20.8807 9 19.5 9C18.1193 9 17 7.88071 17 6.5C17 5.11929 18.1193 4 19.5 4C20.8807 4 22 5.11929 22 6.5Z"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
-                            <span class="">Products</span>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Notifications</span>
+                            <span
+                                class="inline-flex items-center justify-center w-3 h-3 p-3.5 ms-3 text-sm font-medium text-white bg-red-500 rounded-full">3</span>
                         </a>
                     </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center text-gray-700 hover:text-theme-color">
-                            <svg class="h-6 w-6 mr-2 text-theme-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    <li>
+                        <a href="/"
+                            class="flex items-center p-2 text-white rounded-lg hover:bg-white hover:text-primary group duration-500">
+                            <svg class="w-6 h-6 text-white transition duration-75 group-hover:text-primary"
+                                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="800px"
+                                height="800px" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                    d="M12 8.25C9.92894 8.25 8.25 9.92893 8.25 12C8.25 14.0711 9.92894 15.75 12 15.75C14.0711 15.75 15.75 14.0711 15.75 12C15.75 9.92893 14.0711 8.25 12 8.25ZM9.75 12C9.75 10.7574 10.7574 9.75 12 9.75C13.2426 9.75 14.25 10.7574 14.25 12C14.25 13.2426 13.2426 14.25 12 14.25C10.7574 14.25 9.75 13.2426 9.75 12Z"
+                                    fill="currentColor" />
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                    d="M11.9747 1.25C11.5303 1.24999 11.1592 1.24999 10.8546 1.27077C10.5375 1.29241 10.238 1.33905 9.94761 1.45933C9.27379 1.73844 8.73843 2.27379 8.45932 2.94762C8.31402 3.29842 8.27467 3.66812 8.25964 4.06996C8.24756 4.39299 8.08454 4.66251 7.84395 4.80141C7.60337 4.94031 7.28845 4.94673 7.00266 4.79568C6.64714 4.60777 6.30729 4.45699 5.93083 4.40743C5.20773 4.31223 4.47642 4.50819 3.89779 4.95219C3.64843 5.14353 3.45827 5.3796 3.28099 5.6434C3.11068 5.89681 2.92517 6.21815 2.70294 6.60307L2.67769 6.64681C2.45545 7.03172 2.26993 7.35304 2.13562 7.62723C1.99581 7.91267 1.88644 8.19539 1.84541 8.50701C1.75021 9.23012 1.94617 9.96142 2.39016 10.5401C2.62128 10.8412 2.92173 11.0602 3.26217 11.2741C3.53595 11.4461 3.68788 11.7221 3.68786 12C3.68785 12.2778 3.53592 12.5538 3.26217 12.7258C2.92169 12.9397 2.62121 13.1587 2.39007 13.4599C1.94607 14.0385 1.75012 14.7698 1.84531 15.4929C1.88634 15.8045 1.99571 16.0873 2.13552 16.3727C2.26983 16.6469 2.45535 16.9682 2.67758 17.3531L2.70284 17.3969C2.92507 17.7818 3.11058 18.1031 3.28089 18.3565C3.45817 18.6203 3.64833 18.8564 3.89769 19.0477C4.47632 19.4917 5.20763 19.6877 5.93073 19.5925C6.30717 19.5429 6.647 19.3922 7.0025 19.2043C7.28833 19.0532 7.60329 19.0596 7.8439 19.1986C8.08452 19.3375 8.24756 19.607 8.25964 19.9301C8.27467 20.3319 8.31403 20.7016 8.45932 21.0524C8.73843 21.7262 9.27379 22.2616 9.94761 22.5407C10.238 22.661 10.5375 22.7076 10.8546 22.7292C11.1592 22.75 11.5303 22.75 11.9747 22.75H12.0252C12.4697 22.75 12.8407 22.75 13.1454 22.7292C13.4625 22.7076 13.762 22.661 14.0524 22.5407C14.7262 22.2616 15.2616 21.7262 15.5407 21.0524C15.686 20.7016 15.7253 20.3319 15.7403 19.93C15.7524 19.607 15.9154 19.3375 16.156 19.1985C16.3966 19.0596 16.7116 19.0532 16.9974 19.2042C17.3529 19.3921 17.6927 19.5429 18.0692 19.5924C18.7923 19.6876 19.5236 19.4917 20.1022 19.0477C20.3516 18.8563 20.5417 18.6203 20.719 18.3565C20.8893 18.1031 21.0748 17.7818 21.297 17.3969L21.3223 17.3531C21.5445 16.9682 21.7301 16.6468 21.8644 16.3726C22.0042 16.0872 22.1135 15.8045 22.1546 15.4929C22.2498 14.7697 22.0538 14.0384 21.6098 13.4598C21.3787 13.1586 21.0782 12.9397 20.7378 12.7258C20.464 12.5538 20.3121 12.2778 20.3121 11.9999C20.3121 11.7221 20.464 11.4462 20.7377 11.2742C21.0783 11.0603 21.3788 10.8414 21.6099 10.5401C22.0539 9.96149 22.2499 9.23019 22.1547 8.50708C22.1136 8.19546 22.0043 7.91274 21.8645 7.6273C21.7302 7.35313 21.5447 7.03183 21.3224 6.64695L21.2972 6.60318C21.0749 6.21825 20.8894 5.89688 20.7191 5.64347C20.5418 5.37967 20.3517 5.1436 20.1023 4.95225C19.5237 4.50826 18.7924 4.3123 18.0692 4.4075C17.6928 4.45706 17.353 4.60782 16.9975 4.79572C16.7117 4.94679 16.3967 4.94036 16.1561 4.80144C15.9155 4.66253 15.7524 4.39297 15.7403 4.06991C15.7253 3.66808 15.686 3.2984 15.5407 2.94762C15.2616 2.27379 14.7262 1.73844 14.0524 1.45933C13.762 1.33905 13.4625 1.29241 13.1454 1.27077C12.8407 1.24999 12.4697 1.24999 12.0252 1.25H11.9747ZM10.5216 2.84515C10.5988 2.81319 10.716 2.78372 10.9567 2.76729C11.2042 2.75041 11.5238 2.75 12 2.75C12.4762 2.75 12.7958 2.75041 13.0432 2.76729C13.284 2.78372 13.4012 2.81319 13.4783 2.84515C13.7846 2.97202 14.028 3.21536 14.1548 3.52165C14.1949 3.61826 14.228 3.76887 14.2414 4.12597C14.271 4.91835 14.68 5.68129 15.4061 6.10048C16.1321 6.51968 16.9974 6.4924 17.6984 6.12188C18.0143 5.9549 18.1614 5.90832 18.265 5.89467C18.5937 5.8514 18.9261 5.94047 19.1891 6.14228C19.2554 6.19312 19.3395 6.27989 19.4741 6.48016C19.6125 6.68603 19.7726 6.9626 20.0107 7.375C20.2488 7.78741 20.4083 8.06438 20.5174 8.28713C20.6235 8.50382 20.6566 8.62007 20.6675 8.70287C20.7108 9.03155 20.6217 9.36397 20.4199 9.62698C20.3562 9.70995 20.2424 9.81399 19.9397 10.0041C19.2684 10.426 18.8122 11.1616 18.8121 11.9999C18.8121 12.8383 19.2683 13.574 19.9397 13.9959C20.2423 14.186 20.3561 14.29 20.4198 14.373C20.6216 14.636 20.7107 14.9684 20.6674 15.2971C20.6565 15.3799 20.6234 15.4961 20.5173 15.7128C20.4082 15.9355 20.2487 16.2125 20.0106 16.6249C19.7725 17.0373 19.6124 17.3139 19.474 17.5198C19.3394 17.72 19.2553 17.8068 19.189 17.8576C18.926 18.0595 18.5936 18.1485 18.2649 18.1053C18.1613 18.0916 18.0142 18.045 17.6983 17.8781C16.9973 17.5075 16.132 17.4803 15.4059 17.8995C14.68 18.3187 14.271 19.0816 14.2414 19.874C14.228 20.2311 14.1949 20.3817 14.1548 20.4784C14.028 20.7846 13.7846 21.028 13.4783 21.1549C13.4012 21.1868 13.284 21.2163 13.0432 21.2327C12.7958 21.2496 12.4762 21.25 12 21.25C11.5238 21.25 11.2042 21.2496 10.9567 21.2327C10.716 21.2163 10.5988 21.1868 10.5216 21.1549C10.2154 21.028 9.97201 20.7846 9.84514 20.4784C9.80512 20.3817 9.77195 20.2311 9.75859 19.874C9.72896 19.0817 9.31997 18.3187 8.5939 17.8995C7.86784 17.4803 7.00262 17.5076 6.30158 17.8781C5.98565 18.0451 5.83863 18.0917 5.73495 18.1053C5.40626 18.1486 5.07385 18.0595 4.81084 17.8577C4.74458 17.8069 4.66045 17.7201 4.52586 17.5198C4.38751 17.314 4.22736 17.0374 3.98926 16.625C3.75115 16.2126 3.59171 15.9356 3.4826 15.7129C3.37646 15.4962 3.34338 15.3799 3.33248 15.2971C3.28921 14.9684 3.37828 14.636 3.5801 14.373C3.64376 14.2901 3.75761 14.186 4.0602 13.9959C4.73158 13.5741 5.18782 12.8384 5.18786 12.0001C5.18791 11.1616 4.73165 10.4259 4.06021 10.004C3.75769 9.81389 3.64385 9.70987 3.58019 9.62691C3.37838 9.3639 3.28931 9.03149 3.33258 8.7028C3.34348 8.62001 3.37656 8.50375 3.4827 8.28707C3.59181 8.06431 3.75125 7.78734 3.98935 7.37493C4.22746 6.96253 4.3876 6.68596 4.52596 6.48009C4.66055 6.27983 4.74468 6.19305 4.81093 6.14222C5.07395 5.9404 5.40636 5.85133 5.73504 5.8946C5.83873 5.90825 5.98576 5.95483 6.30173 6.12184C7.00273 6.49235 7.86791 6.51962 8.59394 6.10045C9.31998 5.68128 9.72896 4.91837 9.75859 4.12602C9.77195 3.76889 9.80512 3.61827 9.84514 3.52165C9.97201 3.21536 10.2154 2.97202 10.5216 2.84515Z"
+                                    fill="currentColor" />
                             </svg>
-                            <span class="">Analytics</span>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Settings</span>
                         </a>
                     </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center text-gray-700 hover:text-theme-color">
-                            <svg class="h-6 w-6 mr-2 text-theme-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-5a3 3 0 016 0v5a3 3 0 01-6 0zM7 21h10M7 7h10M9 11h6M12 15h3m-3-3v6"/>
+                    <li>
+                        <a href="/store"
+                            class="flex items-center p-2 text-white rounded-lg hover:bg-white hover:text-primary group duration-500">
+                            <svg fill="currentColor" height="800px" width="800px" class="w-5 h-5 text-white transition duration-75 group-hover:text-primary" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                viewBox="0 0 512 512" xml:space="preserve">
+                                <g>
+                                    <g>
+                                        <path d="M489.739,166.957c9.22,0,16.696-7.475,16.696-16.696v-50.087c0-18.412-14.979-33.391-33.391-33.391H372.87V33.391
+                                            C372.87,14.979,357.89,0,339.478,0H172.522C154.11,0,139.13,14.979,139.13,33.391v33.391H38.957
+                                            c-18.412,0-33.391,14.979-33.391,33.391v50.087c0,9.22,7.475,16.696,16.696,16.696h16.696c0,13.601,0,295.377,0,311.652H22.261
+                                            c-9.22,0-16.696,7.475-16.696,16.696S13.04,512,22.261,512c11.758,0,456.737,0,467.478,0c9.22,0,16.696-7.475,16.696-16.696
+                                            s-7.475-16.696-16.696-16.696h-16.696c0-16.281,0-298.041,0-311.652H489.739z M172.522,33.391h166.957v33.391H172.522V33.391z
+                                                M205.913,378.435h-16.696c-9.22,0-16.696,7.475-16.696,16.696s7.475,16.696,16.696,16.696h16.696v66.783H139.13V345.043h66.783
+                                            V378.435z M439.652,478.609H239.304V328.348c0-9.22-7.475-16.696-16.696-16.696H122.435c-9.22,0-16.696,7.475-16.696,16.696
+                                            v150.261H72.348V269.276c9.831,5.702,21.231,8.984,33.391,8.984c19.932,0,37.84-8.789,50.087-22.68
+                                            c12.247,13.892,30.155,22.68,50.087,22.68c19.932,0,37.84-8.789,50.087-22.68c12.247,13.892,30.155,22.68,50.087,22.68
+                                            s37.84-8.789,50.087-22.68c12.247,13.892,30.155,22.68,50.087,22.68c12.16,0,23.56-3.282,33.391-8.984V478.609z M72.348,211.478
+                                            v-44.522h66.783v44.522c0,18.412-14.979,33.391-33.391,33.391S72.348,229.89,72.348,211.478z M172.522,211.478v-44.522h66.783
+                                            v44.522c0,18.412-14.979,33.391-33.391,33.391C187.501,244.87,172.522,229.89,172.522,211.478z M272.696,211.478v-44.522h66.783
+                                            v44.522c0,18.412-14.979,33.391-33.391,33.391C287.675,244.87,272.696,229.89,272.696,211.478z M439.652,211.478
+                                            c0,18.412-14.979,33.391-33.391,33.391c-18.412,0-33.391-14.979-33.391-33.391v-44.522h66.783V211.478z M38.957,133.565v-33.391
+                                            c7.607,0,423.505,0,434.087,0v33.391C454.666,133.565,50.492,133.565,38.957,133.565z"/>
+                                    </g>
+                                    </g>
+                                <g>
+                                <g>
+                                <path d="M389.565,311.652H289.391c-9.22,0-16.696,7.475-16.696,16.696v100.174c0,9.22,7.475,16.696,16.696,16.696h100.174
+                                    c9.22,0,16.696-7.475,16.696-16.696V328.348C406.261,319.127,398.786,311.652,389.565,311.652z M372.87,411.826h-66.783v-66.783
+                                    h66.783V411.826z"/>
+                                </g>
+                                </g>
                             </svg>
-                            <span class="">Reports</span>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Store</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/order"
+                            class="flex items-center p-2 text-white rounded-lg hover:bg-white hover:text-primary group duration-500">
+                            <svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary"
+                                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                viewBox="0 0 18 20">
+                                <path
+                                    d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z" />
+                            </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Transactions</span>
+                        </a>
+                    </li>
+                    {% if user.is_staff %}
+                    <li>
+                        <a href="/staff_admin"
+                            class="flex items-center p-2 text-white rounded-lg hover:bg-white hover:text-primary group duration-500">                        
+                                <svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary" fill="currentColor" width="800px" height="800px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M276.941 440.584v565.722c0 422.4 374.174 625.468 674.71 788.668l8.02 4.292 8.131-4.292c300.537-163.2 674.71-366.268 674.71-788.668V440.584l-682.84-321.657L276.94 440.584Zm682.73 1479.529c-9.262 0-18.523-2.372-26.993-6.89l-34.9-18.974C588.095 1726.08 164 1495.906 164 1006.306V404.78c0-21.91 12.65-41.788 32.414-51.162L935.727 5.42c15.134-7.228 32.866-7.228 48 0l739.313 348.2c19.765 9.374 32.414 29.252 32.414 51.162v601.525c0 489.6-424.207 719.774-733.779 887.943l-34.899 18.975c-8.47 4.517-17.731 6.889-27.105 6.889Zm467.158-547.652h-313.412l-91.595-91.482v-83.803H905.041v-116.78h-83.69l-58.503-58.504c-1.92.113-3.84.113-5.76.113-176.075 0-319.285-143.21-319.285-319.285 0-176.075 143.21-319.398 319.285-319.398 176.075 0 319.285 143.323 319.285 319.398 0 1.92 0 3.84-.113 5.647l350.57 350.682v313.412Zm-266.654-112.941h153.713v-153.713L958.462 750.155l3.953-37.27c1.017-123.897-91.595-216.621-205.327-216.621S550.744 588.988 550.744 702.72c0 113.845 92.612 206.344 206.344 206.344l47.21-5.309 63.811 63.7h149.873v116.78h116.781v149.986l25.412 25.299Zm-313.4-553.57c0 46.758-37.949 84.706-84.706 84.706-46.758 0-84.706-37.948-84.706-84.706s37.948-84.706 84.706-84.706c46.757 0 84.706 37.948 84.706 84.706" fill-rule="evenodd"/>
+                                </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Staff Admin</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if user.profile.is_rider %}
+                    <li>
+                        <a href="/rider_admin"
+                            class="flex items-center p-2 text-white rounded-lg hover:bg-white hover:text-primary group duration-500">                        
+                            <svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary" fill="currentColor" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                            width="800px" height="800px" viewBox="0 0 533.954 533.955"
+                            xml:space="preserve">
+                       <g>
+                           <path d="M456.402,383.113v115.342h-0.78l-7.43,3.771c-3.511,1.773-56.867,28.017-149.441,31.362V365.273
+                               c0-26.894-26.445-46.398-45.366-56.932c4.492,0.349,9.008,0.585,13.589,0.585c46.24,0,88.23-18.483,119.048-48.397
+                               C428.066,285.277,456.402,330.902,456.402,383.113z M285.842,365.273v168.563c-2.217,0.024-4.333,0.118-6.591,0.118
+                               c-53.543,0-118.597-7.819-193.457-31.197l-7.953-2.494l-0.29-1.797V383.113c0-52.211,28.345-97.836,70.38-122.584
+                               c22.934,22.266,52.059,38.178,84.512,44.875l-2.311,6.04C230.682,311.651,285.842,333.202,285.842,365.273z M209.909,403.528
+                               l-45.817-38.515l-8.311,9.883l41.225,34.644v72.306h12.912v-78.317H209.909z M121.735,144.344
+                               c0-62.38,39.463-115.254,94.682-135.791C217.572,3.656,221.943,0,227.189,0h79.571c5.237,0,9.587,3.632,10.758,8.502
+                               c55.229,20.543,94.696,73.45,94.696,135.842c0,80.215-65.019,145.236-145.24,145.236
+                               C186.771,289.581,121.735,224.559,121.735,144.344z M242.389,38.003c0,13.565,11.035,24.598,24.598,24.598
+                               c13.56,0,24.595-11.032,24.595-24.598V22.189h-49.192V38.003z M149.22,114.648c0,36.274,29.397,95.37,65.684,95.37h104.15
+                               c36.28,0,65.687-59.096,65.687-95.37s-29.406-35.987-65.687-35.987h-104.15C178.623,78.667,149.22,78.379,149.22,114.648z
+                                M311.819,87.544h-22.248l-47.147,108.123h21.953L311.819,87.544z M299.075,195.667l47.44-108.123h-22.254l-47.145,108.123H299.075
+                               z"/>
+                       </g>
+                       </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Rider Admin</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <a href="/logout"
+                            class="flex items-center p-2 text-white rounded-lg hover:bg-white hover:text-primary group duration-500">
+                            <svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary"
+                                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+                            </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Sign Out</span>
                         </a>
                     </li>
                 </ul>
-            </nav>
+            </div>
         </aside>
 
         <!-- Main Dashboard Area -->
         <main class="flex-1 p-6 overflow-y-auto">
-            <header class="flex justify-between items-center">
-                <img src="/static/marrigoldblack.png" class="w-28 md:-mr-[47rem]" alt="Logo" />
+            <header class="flex justify-between items-center py-4">
+                <button onclick="openMenu()" id="menu" data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar"
+        aria-controls="default-sidebar" type="button"
+        class="inline-flex z-20 items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg">
+        <span class="sr-only">Open sidebar</span>
+        <svg class="w-6 h-6" aria-hidden="true" fill="#000" viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg">
+            <path clip-rule="evenodd" fill-rule="evenodd"
+                d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+            </path>
+        </svg>
+    </button>
                 <h1 class="md:text-2xl font-semibold -mt-2 mr-[28rem] md:mr-0 text-theme-color">Staff Dashboard</h1>
                 <div class="hidden md:block relative -mt-2">
                     <input type="text" placeholder="Search..." class="border rounded-lg p-2 pl-10 w-full md:w-auto">
@@ -84,18 +242,18 @@
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 <div class="bg-white p-6 shadow rounded-lg">
                     <h2 class="text-xl font-semibold text-theme-color">Total Orders</h2>
-                    <p class="text-3xl font-bold mt-2">{{ orders|length }}</p>
-                    <p class="text-green-500 mt-1">+11.01% vs last 7 days</p>
+                    <p class="text-3xl font-bold mt-2">{{ all_orders|length }}</p>
+                    <p class="text-green-500 mt-1">All Time</p>
                 </div>
                 <div class="bg-white p-6 shadow rounded-lg">
-                    <h2 class="text-xl font-semibold text-theme-color">Total Sales</h2>
-                    <p class="text-3xl font-bold mt-2"><span class="font-bold">&#x20A6</span>{{ total_sales }}</p>
-                    <p class="text-green-500 mt-1">+11.01% vs last 7 days</p>
+                    <h2 class="text-xl font-semibold text-theme-color">Today Sales</h2>
+                    <p class="text-3xl font-bold mt-2"><span class="font-bold">&#x20A6</span>{{ today_sales }}</p>
+                    <p class="text-green-500 mt-1">Past 24 hours</p>
                 </div>
                 <div class="bg-white p-6 shadow rounded-lg">
                     <h2 class="text-xl font-semibold text-theme-color">Revenue</h2>
-                    <p class="text-3xl font-bold mt-2"><span class="font-bold">&#x20A6</span>451K</p>
-                    <p class="text-green-500 mt-1">+15.01% vs last 7 days</p>
+                    <p class="text-3xl font-bold mt-2"><span class="font-bold">&#x20A6</span>{{ total_sales }}</p>
+                    <p class="text-green-500 mt-1">All Time</p>
                 </div>
             </section>
 
@@ -186,19 +344,46 @@
             .then(data => {
                 const button = document.querySelector(`button[onclick="toggleAvailability(${productId})"]`);
                 if (data.is_available) {
+                    button.textContent = 'Out of Stock?';
+                    button.classList.remove('bg-green-500');
+                    button.classList.add('bg-red-500');
+                    Toastify({
+                        text: data.name + ' has been made available!',
+                        duration: 2000,
+                        close: true,
+                        gravity: "bottom",
+                        position: "right",
+                        backgroundColor: "#00ff00",
+                        stopOnFocus: true,
+                    }).showToast();
+                } else {
                     button.textContent = 'Restock';
                     button.classList.remove('bg-red-500');
                     button.classList.add('bg-green-500');
-                } else {
-                    button.textContent = 'Out of Stock';
-                    button.classList.remove('bg-green-500');
-                    button.classList.add('bg-red-500');
+                    Toastify({
+                        text: data.name + ' has been made unavailable!',
+                        duration: 2000,
+                        close: true,
+                        gravity: "bottom",
+                        position: "right",
+                        backgroundColor: "#ff0000",
+                        stopOnFocus: true,
+                    }).showToast();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
             });
         }
+    </script>
+    <script>
+        let menu = document.getElementById("menu")
+
+        function openMenu() {
+            let sidebar = document.getElementById('default-sidebar');
+            sidebar.classList.toggle("-translate-x-0");
+            sidebar.classList.toggle("-translate-x-full");
+        };
     </script>
 </body>
 </html>

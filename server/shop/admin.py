@@ -54,7 +54,7 @@ class OrderAdmin(admin.ModelAdmin):
     
 class OrderHistoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'user_order', 'phone_number', 'location', 'total_price', 'payment_method', 'status', 'rider', 'delivered', 'payment_date')
-    list_filter = ('status', 'delivered', 'rider', 'location', 'payment_date')
+    list_filter = ('status', 'delivered', 'rider', 'payment_method', 'location', 'payment_date')
     search_fields = ('user__username', 'status', 'delivered')
     readonly_fields = ('id', 'user', 'total_price', 'location', 'payment_date')
     
