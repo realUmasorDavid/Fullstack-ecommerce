@@ -162,6 +162,7 @@ def toggle_availability(request, product_id):
 
     return JsonResponse(response_data)
 
+@login_required
 def search_products(request):
     query = request.GET.get('query', '')
     if query:
@@ -246,6 +247,7 @@ def logout(request):
     auth.logout(request)
     return redirect('login')
 
+@login_required
 def clear_user_cart(user):
     cart = Cart.objects.get(user=user)
 
@@ -260,6 +262,7 @@ def clear_user_cart(user):
     except Product.DoesNotExist:
         pass  # Handle the case where 'Pack' product does not exist
 
+@login_required
 def initialize_payment_view(request):
     if request.method == 'POST':
         location = request.POST.get('location')
@@ -368,6 +371,7 @@ def initialize_payment_view(request):
     }
     return render(request, 'cart.html', context)
 
+@login_required
 def verify_payment_view(request):
     reference = request.GET.get('reference')
     cart = Cart.objects.get(user=request.user)
@@ -453,6 +457,7 @@ def error_500(request, *args, **argv):
 def connection_error_view(request):
     return render(request, 'errors/connection_error.html', status=503)
 
+@login_required
 def admin_dashboard(request):
     # Check if the user has staff permissions
     if not request.user.profile.is_staff:
