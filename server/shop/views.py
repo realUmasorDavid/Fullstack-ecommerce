@@ -247,7 +247,6 @@ def logout(request):
     auth.logout(request)
     return redirect('login')
 
-@login_required
 def clear_user_cart(user):
     cart = Cart.objects.get(user=user)
 
