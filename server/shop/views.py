@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
+from datetime import timedelta
 from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Sum, Count
 from django.contrib import auth, messages
@@ -333,6 +334,7 @@ def initialize_payment_view(request):
                 user_order=", ".join([str(item) for item in cart_items]),
                 reference=payment.reference,
                 payment_method='cash',
+                delivery=delivery,
                 location=order.location,
                 total_price=cart.subtotal,
                 payment=payment
@@ -368,6 +370,8 @@ def initialize_payment_view(request):
 
 def verify_payment_view(request):
     reference = request.GET.get('reference')
+    cart = Cart.objects.get(user=request.user)
+    delivery = cart.delivery
 
     if not reference:
         return JsonResponse({'status': 'failed', 'message': 'Reference not provided'})
@@ -389,6 +393,7 @@ def verify_payment_view(request):
                 user_order=", ".join([str(item) for item in cart_items]),
                 reference=payment.reference,
                 location=order.location,
+                delivery=delivery,
                 total_price=cart.subtotal,
                 payment_method='paystack',
                 payment=payment
@@ -445,6 +450,9 @@ def error_403(request, *args, **argv):
 def error_500(request, *args, **argv):
     return render(request, 'errors/500.html', status=500)
 
+def connection_error_view(request):
+    return render(request, 'errors/connection_error.html', status=503)
+
 def admin_dashboard(request):
     # Check if the user has staff permissions
     if not request.user.profile.is_staff:
@@ -457,24 +465,25 @@ def admin_dashboard(request):
     all_orders = OrderHistory.objects.all()
     orders = OrderHistory.objects.all().order_by('-payment_date')[:10]
 
-    # Get the current date
     today = timezone.now().date()
+    yesterday = timezone.now().date() - timedelta(1)
 
-    # Calculate total sales for the current day
+    # Calculate today's sales
+    yesterday_sales = OrderHistory.objects.filter(payment_date__date=yesterday).aggregate(total=Sum('total_price'))['total'] or 0
     today_sales = OrderHistory.objects.filter(payment_date__date=today).aggregate(total=Sum('total_price'))['total'] or 0
 
-    # Calculate total sales for all time
+    # Calculate all sales
     total_sales = OrderHistory.objects.aggregate(total_sales=Sum('total_price'))['total_sales'] or 0
 
     # Calculate total sales for each product
     product_sales = OrderHistory.objects.values('user_order').annotate(total_sales=Sum('total_price'))
 
-    # Prepare the context dictionary to pass to the template
     context = {
         'user': request.user,
         'products': products,
         'all_orders': all_orders,
         'orders': orders,
+        'yesterday_sales': yesterday_sales,
         'today_sales': today_sales,
         'total_sales': total_sales,
         'product_sales': product_sales,
@@ -490,17 +499,21 @@ def rider_dashboard(request):
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     # Fetch new orders
-    new_orders = OrderHistory.objects.filter(status='Sent')
+    new_orders = OrderHistory.objects.filter(status='Sent').order_by('-payment_date')
 
     # Fetch ongoing deliveries for the current user
     ongoing_deliveries = OrderHistory.objects.filter(rider=request.user.username, delivered=None)
     
+    
     today = timezone.now().date()
-    today_sales = OrderHistory.objects.filter(payment_date__date=today).aggregate(total=Sum('total_price'))['total'] or 0
+    yesterday = timezone.now().date() - timedelta(1)
+    yesterday_sales = OrderHistory.objects.filter(payment_date__date=yesterday, rider=request.user.username).aggregate(total=Sum('delivery'))['total'] or 0
+    today_sales = OrderHistory.objects.filter(payment_date__date=today, rider=request.user.username).aggregate(total=Sum('delivery'))['total'] or 0
 
     context = {
         'user': request.user,
         'profile': request.user.profile,
+        'yesterday_sales': yesterday_sales,
         'today_sales': today_sales,
         'new_orders': new_orders,
         'ongoing_deliveries': ongoing_deliveries,

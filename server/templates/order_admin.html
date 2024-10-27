@@ -235,16 +235,21 @@
             </header>
 
             <!-- Rider Status -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <div class="bg-white p-6 shadow rounded-lg">
                     <h2 class="text-xl font-semibold text-theme-color">Active Orders</h2>
                     <p class="text-3xl font-bold mt-2">{{ new_orders|length }}</p>
                     <p class="text-green-500 mt-1">New Orders</p>
                 </div>
                 <div class="bg-white p-6 shadow rounded-lg">
+                    <h2 class="text-xl font-semibold text-theme-color">Earnings Yesterday</h2>
+                    <p class="text-3xl font-bold mt-2"><span class="font-bold">&#x20A6</span>{{ yesterday_sales }}</p>
+                    <p class="text-green-500 mt-1">You've made <span class="font-bold">&#x20A6</span>{{ yesterday_sales }} yesterday</p>
+                </div>
+                <div class="bg-white p-6 shadow rounded-lg">
                     <h2 class="text-xl font-semibold text-theme-color">Earnings Today</h2>
                     <p class="text-3xl font-bold mt-2"><span class="font-bold">&#x20A6</span>{{ today_sales }}</p>
-                    <p class="text-green-500 mt-1">We've made <span class="font-bold">&#x20A6</span>{{ today_sales }} today</p>
+                    <p class="text-green-500 mt-1">You've made <span class="font-bold">&#x20A6</span>{{ today_sales }} today</p>
                 </div>
                 <div class="bg-white p-6 shadow rounded-lg">
                     <h2 class="text-xl font-semibold text-theme-color">Ongoing Deliveries</h2>

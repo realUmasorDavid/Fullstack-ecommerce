@@ -1,4 +1,5 @@
 # models.py
+import random
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -123,6 +124,7 @@ class OrderHistory(models.Model):
     user_order = models.CharField(max_length=255, blank=True, null=True)
     reference = models.CharField(max_length=255, null=True, blank=True)
     location = models.CharField(max_length=255, null=True)
+    delivery = models.IntegerField(default=400, null=True, blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     PAYMENT_METHOD_CHOICES = [
         ('paystack', 'Paystack'),
