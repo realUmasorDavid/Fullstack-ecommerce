@@ -6,13 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from datetime import timedelta
+import logging
 from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Sum, Count
 from django.contrib import auth, messages
 from django.conf import settings
 from .models import *
 import json
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponseForbidden, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from .paystack import initialize_payment, verify_payment
@@ -410,12 +411,19 @@ def verify_payment_view(request):
                 cart_item.quantity = 1
                 cart_item.save()
                 
+            logger = logging.getLogger(__name__)
+
             try:
                 pack_product = Product.objects.get(name='Pack')
                 pack_cart_item = get_object_or_404(CartItem, product=pack_product)
                 pack_cart_item.delete()
+                logger.info("Successfully deleted CartItem for product 'Pack'.")
             except Product.DoesNotExist:
-                pass  # Handle the cart where 'Pack' product does not exist
+                logger.warning("Product 'Pack' does not exist.")
+            except Http404:
+                logger.warning("CartItem for product 'Pack' does not exist.")
+            except Exception as e:
+                logger.error(f"An unexpected error occurred: {e}")
 
             clear_user_cart(request.user)
 

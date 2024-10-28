@@ -303,7 +303,7 @@
                     {% for order in ongoing_deliveries %}
                     <li class="flex flex-col md:flex-row justify-between mb-4 p-4 bg-gray-50 rounded shadow">
                         <div class="info">
-                            <h3 class="text-lg font-semibold">Order #{{ order.id }} by {{order.user.first_name}}</h3>
+                            <h3 class="text-lg font-semibold">Order #{{ order.id }} by {{order.user.username}}</h3>
                             <h4 class="text-lg">Order: {{ order.user_order }}</h4>
                             <p>Pickup: Marrigold</p>
                             <p>Dropoff: {{ order.location }}</p>
