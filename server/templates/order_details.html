@@ -73,10 +73,18 @@
                 </div>
                 <div>
                     <p class="font-bold">Rider:</p>
-                    {% if order.rider == 'none' %}
-                        <p>Order hasn't been accepted</p>
+                    {% if order.rider %}
+                        <p>{{ order.rider.username }}</p>
                     {% else %}
-                        <p>{{ order.rider }}</p>
+                        <p>Order hasn't been accepted</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="font-bold">Rider Number:</p>
+                    {% if rider_phone_number %}
+                        <p>{{ rider_phone_number }}</p>
+                    {% else %}
+                        <p>Order hasn't been accepted</p>
                     {% endif %}
                 </div>
                 <div>

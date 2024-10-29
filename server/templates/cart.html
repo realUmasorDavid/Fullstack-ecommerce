@@ -74,7 +74,7 @@
                 <p id="original-price">Original Price: <span class="">&#x20A6</span>{{ amount }}</p>
                 <p>Delivery: <span class="">&#x20A6</span>{{ cart.delivery }}</p>
                 <p>Service Charge: <span class="">&#x20A6</span>{{ cart.service_fee }}</p>
-    
+
                 <form id="paymentForm" action="{% url 'initialize_payment' %}" method="post" class="flex flex-col">
                     {% csrf_token %}
                     <p><strong>Location:</strong></p>
@@ -104,14 +104,14 @@
                         <option value="Peace Hall 1">Peace Hall 1</option>
                         <option value="Peace Hall 2">Peace Hall 2</option>
                     </select>
-    
+
                     <hr class="my-2 bg-black h-0.5">
-    
+
                     <p class="mb-2" id="totalPrice"><strong>Total Amount:</strong> <span class="">&#x20A6</span>{{ cart.subtotal }}</p>
                     {% if error %}
                         <p class="text-red-500 my-2">{{ error }}</p>
                     {% endif %}
-                    
+
                     <label for="payment_method">Payment Method:</label>
                     <select id="payment_method" name="payment_method" required class="mb-4 p-2 border border-gray-300 rounded">
                         <option value="paystack">Paystack</option>
@@ -270,7 +270,7 @@
                 this.submit(); // Submit the form if the function completes successfully
             }
         });
-    
+
         // Handle continue shopping button click
         document.getElementById('continue-shopping-button').addEventListener('click', async function(event) {
             event.preventDefault(); // Prevent the default action
@@ -279,7 +279,6 @@
                 window.location.href = '/store'; // Redirect to the store URL
             }
         });
-        
 
         // Initial call to update the original price
         updateOriginalPrice();

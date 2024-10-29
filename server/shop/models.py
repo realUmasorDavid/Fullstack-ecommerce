@@ -43,6 +43,7 @@ class Product(models.Model):
         return self.name
 
 class CartItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
@@ -141,14 +142,7 @@ class OrderHistory(models.Model):
         ],
         default='Sent',
     )
-    rider = models.CharField(
-        max_length=50,
-        choices=[
-            ('LCU Errands', 'lcu_errands'),
-            ('Green Baba Delivery', 'greenbaba'),
-        ],
-        default='Not Picked',
-    )
+    rider = models.ForeignKey(User, related_name='rider_orders', on_delete=models.SET_NULL, null=True, blank=True)
     delivered = models.BooleanField(default=None, blank=True, null=True)
     payment_date = models.DateTimeField(auto_now_add=True)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, null=True, blank=True)

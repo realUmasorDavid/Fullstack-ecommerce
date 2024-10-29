@@ -11,7 +11,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('id', 'name', 'category', 'price')
 
 class CartItemAdmin(admin.ModelAdmin):
-    list_display = ('product', 'quantity')
+    list_display = ('user', 'product', 'quantity')
 
 class CartItemInline(admin.TabularInline):
     model = Cart.items.through  # This specifies the many-to-many relationship

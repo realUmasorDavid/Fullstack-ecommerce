@@ -26,8 +26,9 @@ from .paystack import initialize_payment, verify_payment
 class UpdateCartQuantitiesView(View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
+        user = request.user
         for cart_item_id, quantity in data.items():
-            cart_item = CartItem.objects.get(id=cart_item_id)
+            cart_item = CartItem.objects.get(id=cart_item_id, user=user)
             cart_item.quantity = quantity
             cart_item.save()
         return JsonResponse({'success': True})
@@ -37,18 +38,30 @@ class UpdateCartQuantitiesView(View):
 def add_to_cart(request, pk):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         product = get_object_or_404(Product, pk=pk)
-        cart, created = Cart.objects.get_or_create(user=request.user)
-        cart_item, created = CartItem.objects.get_or_create(product=product)
+        user = request.user
+
+        # Get or create the user's cart
+        cart, created = Cart.objects.get_or_create(user=user)
+
+        # Check if the product is already in the user's cart
+        cart_item, created = CartItem.objects.get_or_create(user=user, product=product)
+
+        if not created:
+            # If the item already exists, increase the quantity
+            cart_item.quantity += 1
+            cart_item.save()
+
+        # Add the cart_item to the cart
         cart.items.add(cart_item)
 
         # Check if the added product is under 'Main Meal' category
         if product.category.name == 'Main Meals':
             try:
                 pack_product = Product.objects.get(name='Pack')
-                pack_in_cart = cart.items.filter(product=pack_product).exists()
+                pack_in_cart = CartItem.objects.filter(user=user, product=pack_product).exists()
 
                 if not pack_in_cart:
-                    cart_item_pack, created = CartItem.objects.get_or_create(product=pack_product, defaults={'quantity': 1})
+                    cart_item_pack, created = CartItem.objects.get_or_create(user=user, product=pack_product, defaults={'quantity': 1})
                     if created:
                         cart.items.add(cart_item_pack)
                         cart.save()
@@ -71,27 +84,29 @@ def add_to_cart(request, pk):
 @login_required
 def delete_item(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_item = get_object_or_404(CartItem, product=product)
+    user = request.user
+    cart = Cart.objects.get(user=user)
+    cart_item = get_object_or_404(CartItem, product=product, user=user)
 
     # Check if the item being deleted is the 'Pack' product
     if product.name == 'Pack':
-        main_meal_items = cart.items.filter(product__category__name='Main Meals')
+        main_meal_items = CartItem.objects.filter(user=user, product__category__name='Main Meals')
         if main_meal_items.exists():
             messages.error(request, 'A Pack is required for your order.')
             return redirect('initialize_payment')
 
     cart.items.remove(cart_item)
+    cart_item.delete()
 
     # Check if the removed product is a 'Main Meal'
     if product.category.name == 'Main Meals':
-        main_meal_items = cart.items.filter(product__category__name='Main Meals')
+        main_meal_items = CartItem.objects.filter(user=user, product__category__name='Main Meals')
         if not main_meal_items.exists():
             try:
                 pack_product = Product.objects.get(name='Pack')
-                pack_cart_item = get_object_or_404(CartItem, product=pack_product)
+                pack_cart_item = get_object_or_404(CartItem, product=pack_product, user=user)
                 cart.items.remove(pack_cart_item)
-                pack_cart_item.delete()  # Also delete the 'Pack' CartItem product
+                pack_cart_item.delete()
                 cart.save()
             except Product.DoesNotExist:
                 pass  # Handle the case where 'Pack' product does not exist
@@ -349,18 +364,41 @@ def logout(request):
     return redirect('login')
 
 def clear_user_cart(user):
-    cart = Cart.objects.get(user=user)
+    # Get the user's cart
+    cart = get_object_or_404(Cart, user=user)
 
-    # Delete all items in the cart
-    cart.items.through.objects.filter(cart=cart).delete()
+    # Clear all cart items
+    cart.items.clear()
 
-    # Delete the 'Pack' product in the CartItem
+    # Optionally, delete all CartItem entries for the user's cart
+    CartItem.objects.filter(user=user).delete()
+
+    # Handle the specific case for the 'Pack' product
     try:
         pack_product = Product.objects.get(name='Pack')
         pack_cart_item = CartItem.objects.filter(product=pack_product, cart=cart)
         pack_cart_item.delete()
     except Product.DoesNotExist:
         pass  # Handle the case where 'Pack' product does not exist
+
+    # Save the cart (if there are any additional fields that need to be updated)
+    cart.save()
+
+# def clear_user_cart(user):
+#     CartItem.objects.filter(user=user).delete()
+
+#     cart = Cart.objects.get(user=user)
+
+#     # Delete all items in the cart
+#     cart.items.through.objects.filter(cart=cart).delete()
+
+#     # Delete the 'Pack' product in the CartItem
+#     try:
+#         pack_product = Product.objects.get(name='Pack')
+#         pack_cart_item = CartItem.objects.filter(product=pack_product, cart=cart)
+#         pack_cart_item.delete()
+#     except Product.DoesNotExist:
+#         pass  # Handle the case where 'Pack' product does not exist
 
 @login_required
 def initialize_payment_view(request):
@@ -377,7 +415,7 @@ def initialize_payment_view(request):
         # Get the user's cart
         cart = Cart.objects.get(user=request.user)
         cart_items = cart.items.all()
-        cart_amount = cart.amount
+        cart_amount = sum(item.total for item in cart_items)
         delivery = cart.delivery
         service_fee = cart.service_fee
         amount = cart.subtotal
@@ -431,7 +469,7 @@ def initialize_payment_view(request):
                 status='pending',
                 location=location
             )
-            
+
             order_history = OrderHistory.objects.create(
                 user=request.user,
                 user_order=", ".join([str(item) for item in cart_items]),
@@ -439,7 +477,7 @@ def initialize_payment_view(request):
                 payment_method='cash',
                 delivery=delivery,
                 location=order.location,
-                total_price=cart.subtotal,
+                total_price=amount,
                 payment=payment
             )
 
@@ -447,16 +485,6 @@ def initialize_payment_view(request):
                 product = cart_item.product
                 product.sales += cart_item.quantity
                 product.save()
-
-                cart_item.quantity = 1
-                cart_item.save()
-                
-            try:
-                pack_product = Product.objects.get(name='Pack')
-                pack_cart_item = get_object_or_404(CartItem, product=pack_product)
-                pack_cart_item.delete()
-            except Product.DoesNotExist:
-                pass  # Handle the case where 'Pack' product does not exist
 
             clear_user_cart(request.user)
             return redirect('payment_success')
@@ -474,13 +502,19 @@ def initialize_payment_view(request):
 @login_required
 def verify_payment_view(request):
     reference = request.GET.get('reference')
-    cart = Cart.objects.get(user=request.user)
-    delivery = cart.delivery
 
     if not reference:
         return JsonResponse({'status': 'failed', 'message': 'Reference not provided'})
 
     payment_data = verify_payment(reference)
+    
+    # Get the user's cart
+    cart = Cart.objects.get(user=request.user)
+    cart_items = cart.items.all()
+    delivery = cart.delivery
+    service_fee = cart.service_fee
+    amount = cart.subtotal
+    email = request.user.email
 
     if payment_data:
         try:
@@ -488,8 +522,7 @@ def verify_payment_view(request):
             payment.status = payment_data['status']
             payment.save()
 
-            cart = Cart.objects.get(user=request.user)
-            cart_items = cart.items.all()
+            cart_items = CartItem.objects.filter(user=request.user)
 
             order = Order.objects.filter(user=request.user).latest('created_at')
             order_history = OrderHistory.objects.create(
@@ -498,7 +531,7 @@ def verify_payment_view(request):
                 reference=payment.reference,
                 location=order.location,
                 delivery=delivery,
-                total_price=cart.subtotal,
+                total_price=amount,
                 payment_method='paystack',
                 payment=payment
             )
@@ -507,23 +540,6 @@ def verify_payment_view(request):
                 product = cart_item.product
                 product.sales += cart_item.quantity
                 product.save()
-
-                cart_item.quantity = 1
-                cart_item.save()
-                
-            logger = logging.getLogger(__name__)
-
-            try:
-                pack_product = Product.objects.get(name='Pack')
-                pack_cart_item = get_object_or_404(CartItem, product=pack_product)
-                pack_cart_item.delete()
-                logger.info("Successfully deleted CartItem for product 'Pack'.")
-            except Product.DoesNotExist:
-                logger.warning("Product 'Pack' does not exist.")
-            except Http404:
-                logger.warning("CartItem for product 'Pack' does not exist.")
-            except Exception as e:
-                logger.error(f"An unexpected error occurred: {e}")
 
             clear_user_cart(request.user)
 
@@ -549,7 +565,18 @@ def order_history(request):
 
 def order_details(request, order_id):
     order = get_object_or_404(OrderHistory, id=order_id, user=request.user)
-    return render(request, 'order_details.html', {'order': order})
+    rider_phone_number = None
+
+    if order.rider:
+        rider_profile = Profile.objects.get(user=order.rider)
+        rider_phone_number = rider_profile.phone_number
+        
+    context = {
+        'order': order, 
+        'rider_phone_number': rider_phone_number,
+    }
+
+    return render(request, 'order_details.html', context)
 
 def error_404(request, exception):
     data = {}
@@ -576,6 +603,7 @@ def admin_dashboard(request):
     # Get the latest 10 orders, ordered by payment date in descending order
     all_orders = OrderHistory.objects.all()
     orders = OrderHistory.objects.all().order_by('-payment_date')[:10]
+    incoming_orders = OrderHistory.objects.filter(status='Sent').order_by('-payment_date')
 
     today = timezone.now().date()
     yesterday = timezone.now().date() - timedelta(1)
@@ -595,6 +623,7 @@ def admin_dashboard(request):
         'products': products,
         'all_orders': all_orders,
         'orders': orders,
+        'incoming_orders': incoming_orders,
         'yesterday_sales': yesterday_sales,
         'today_sales': today_sales,
         'total_sales': total_sales,
@@ -611,16 +640,19 @@ def rider_dashboard(request):
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     # Fetch new orders
-    new_orders = OrderHistory.objects.filter(status='Sent').order_by('-payment_date')
+    new_orders = OrderHistory.objects.filter(status='Received', delivered=None).order_by('-payment_date')
 
     # Fetch ongoing deliveries for the current user
-    ongoing_deliveries = OrderHistory.objects.filter(rider=request.user.username, delivered=None)
-    
-    
+    ongoing_deliveries = OrderHistory.objects.filter(rider=request.user, delivered=None)
+
     today = timezone.now().date()
-    yesterday = timezone.now().date() - timedelta(1)
-    yesterday_sales = OrderHistory.objects.filter(payment_date__date=yesterday, rider=request.user.username).aggregate(total=Sum('delivery'))['total'] or 0
-    today_sales = OrderHistory.objects.filter(payment_date__date=today, rider=request.user.username).aggregate(total=Sum('delivery'))['total'] or 0
+    yesterday = timezone.now().date() - timedelta(days=1)
+
+    # Calculate yesterday's sales
+    yesterday_sales = OrderHistory.objects.filter(payment_date__date=yesterday, rider=request.user).aggregate(total=Sum('delivery'))['total'] or 0
+
+    # Calculate today's sales
+    today_sales = OrderHistory.objects.filter(payment_date__date=today, rider=request.user).aggregate(total=Sum('delivery'))['total'] or 0
 
     context = {
         'user': request.user,
@@ -634,23 +666,49 @@ def rider_dashboard(request):
     return render(request, 'order_admin.html', context)
 
 @require_POST
-def accept_order(request, order_id):
+@login_required
+def receive_order(request, order_id):
     order = get_object_or_404(OrderHistory, id=order_id)
     if order.status == 'Sent':
+        order.status = 'Received'
+        order.rider = request.user
+        order.save()
+        return JsonResponse({'status': 'success', 'message': 'Order Received successfully.'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Order cannot be received.'}, status=400)
+
+@require_POST
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(OrderHistory, id=order_id)
+    if order.status == 'Sent':
+        order.status = 'Received'
+        order.delivered = False
+        order.save()
+        return JsonResponse({'status': 'success', 'message': 'Order Received successfully.'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Order cannot be received.'}, status=400)
+
+@require_POST
+@login_required
+def accept_order(request, order_id):
+    order = get_object_or_404(OrderHistory, id=order_id)
+    if order.status == 'Received':
         order.status = 'Ready'
-        order.rider = request.user.username
+        order.rider = request.user
         order.save()
         return JsonResponse({'status': 'success', 'message': 'Order accepted successfully.'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Order cannot be accepted.'}, status=400)
 
 @require_POST
+@login_required
 def complete_order(request, order_id):
     order = get_object_or_404(OrderHistory, id=order_id)
-    if order.status == 'Ready':
+    if order.status == 'Ready' and order.rider == request.user:
         order.status = 'Delivered'
         order.delivered = True
         order.save()
         return JsonResponse({'status': 'success', 'message': 'Order delivered successfully.'})
     else:
-        return JsonResponse({'status': 'error', 'message': 'Order not delivered.'}, status=400)
+        return JsonResponse({'status': 'error', 'message': 'Order cannot be completed.'}, status=400)

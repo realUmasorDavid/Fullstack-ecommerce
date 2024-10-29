@@ -316,6 +316,43 @@
                 </div>
             </section>
 
+            <!-- Order Overview -->
+            <section class="grid grid-cols-1 gap-6">
+                
+
+                <!-- Incoming Orders -->
+<div class="bg-white w-[19rem] md:w-auto p-6 mt-6 shadow rounded-lg">
+    <h2 class="text-xl font-semibold mb-4 text-theme-color">Incoming Orders</h2>
+    <table class="w-full">
+        <thead>
+            <tr>
+                <th class="px-4 py-2 text-center">Order ID</th>
+                <th class="px-4 py-2 text-center">User</th>
+                <th class="px-4 py-2 text-center">User Order</th>
+                <th class="px-4 py-2 text-center">Total Price</th>
+                <th class="px-4 py-2 text-center">Payment Date</th>
+                <th class="px-4 py-2 text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in incoming_orders %}
+            <tr>
+                <td class="px-4 py-2 text-center">{{ order.id }}</td>
+                <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.user }}</td>
+                <td class="px-4 py-2 text-center">{{ order.user_order }}</td>
+                <td class="px-4 py-2 text-center"><span class="font-bold">&#x20A6</span>{{ order.total_price }}</td>
+                <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.payment_date }}</td>
+                <td class="px-4 py-2 text-center">
+                    <button onclick="receiveOrder({{ order.id }})" class="bg-green-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Receive</button>
+                    <button onclick="cancelOrder({{ order.id }})" class="bg-red-500 text-white text-sm font-semibold py-1 px-4 rounded-full ml-2">Cancel</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
             <!-- Reports and Analytics -->
             {% comment %} <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div class="bg-white p-6 shadow rounded-lg">
@@ -337,6 +374,52 @@
         </main>
     </div>
     <script>
+            function receiveOrder(orderId) {
+                fetch(`/receive_order/${orderId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Order accepted successfully.');
+                        // Optionally, update the UI to reflect the change
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        
+            function cancelOrder(orderId) {
+                fetch(`/cancel_order/${orderId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Order cancelled successfully.');
+                        // Optionally, update the UI to reflect the change
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+
         function toggleAvailability(productId) {
             fetch(`/toggle_availability/${productId}/`, {
                 method: 'POST',
