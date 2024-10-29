@@ -6,6 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from datetime import timedelta
+from decouple import config
+from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
 import logging
 from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Sum, Count
@@ -13,7 +16,7 @@ from django.contrib import auth, messages
 from django.conf import settings
 from .models import *
 import json
-from django.http import JsonResponse, HttpResponseForbidden, Http404
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from .paystack import initialize_payment, verify_payment
@@ -208,6 +211,103 @@ def profile(request):
 @login_required
 def checkout(request):
     return render(request, 'checkout.html', {})
+
+def normalize_phone_number(phone_number):
+    # Removes any leading zeros and add the country code
+    if phone_number.startswith('0'):
+        phone_number = '+234' + phone_number[1:]
+    elif not phone_number.startswith('+'):
+        phone_number = '+234' + phone_number
+    return phone_number
+
+# Twilio credentials
+# account_sid = config('TWILIO_SID')
+# auth_token = config('TWILIO_AUTH_TOKEN')
+# twilio_number = '+14847256777'
+
+# client = Client(account_sid, auth_token)
+
+# def generate_otp():
+#     return random.randint(100000, 999999)
+
+# def send_otp(phone_number, otp):
+#     try:
+#         message = client.messages.create(
+#             body=f'Your OTP is {otp}',
+#             from_=twilio_number,
+#             to=phone_number
+#         )
+#         return message.sid
+#     except TwilioRestException as e:
+#         print(f"Twilio error: {e}")
+#         return None
+
+# def signup(request):
+#     if request.method == 'POST':
+#         username = request.POST['username']
+#         email = request.POST['email']
+#         password1 = request.POST['password1']
+#         phone_number = request.POST['phone']
+
+#         if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+#             return render(request, 'signup.html', {'error': 'Username or email is already in use'})
+
+#         if password1:
+#             phone_number = normalize_phone_number(phone_number)
+#             otp = generate_otp()
+#             message_sid = send_otp(phone_number, otp)
+
+#             if message_sid is None:
+#                 return render(request, 'signup.html', {'error': 'Failed to send OTP'})
+
+#             # Store OTP in session
+#             request.session['otp'] = str(otp)  # Ensure OTP is stored as a string
+#             request.session['username'] = username
+#             request.session['email'] = email
+#             request.session['password1'] = password1
+#             request.session['phone_number'] = phone_number
+
+#             print(f"OTP stored in session: {request.session['otp']}")  # Debugging statement
+
+#             return redirect('verify_otp')
+#         else:
+#             return render(request, 'signup.html', {'error': 'Unable to create account'})
+#     return render(request, 'signup.html')
+
+# def verify_otp(request):
+#     if request.method == 'POST':
+#         entered_otp = request.POST['otp']
+#         stored_otp = request.session.get('otp')
+
+#         print(f"Entered OTP: {entered_otp}")  # Debugging statement
+#         print(f"Stored OTP: {stored_otp}")  # Debugging statement
+
+#         if entered_otp == stored_otp:
+#             username = request.session.get('username')
+#             email = request.session.get('email')
+#             password1 = request.session.get('password1')
+#             phone_number = request.session.get('phone_number')
+
+#             print(f"Username: {username}")  # Debugging statement
+#             print(f"Email: {email}")  # Debugging statement
+#             print(f"Password: {password1}")  # Debugging statement
+#             print(f"Phone Number: {phone_number}")  # Debugging statement
+
+#             user = User.objects.create_user(username, email, password1)
+#             user.save()
+
+#             user_profile, created = Profile.objects.get_or_create(user=user)
+#             user_profile.phone_number = phone_number
+#             user_profile.save()
+
+#             # Clear session data
+#             request.session.flush()
+
+#             return redirect('store')
+#         else:
+#             print("OTP mismatch")  # Debugging statement
+#             return render(request, 'verify_otp.html', {'error': 'Invalid OTP'})
+#     return render(request, 'verify_otp.html')
 
 def signup(request):
     if request.method == 'POST':

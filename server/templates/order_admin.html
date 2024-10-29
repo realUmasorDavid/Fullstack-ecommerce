@@ -305,7 +305,7 @@
                         <div class="info">
                             <h3 class="text-lg font-semibold">Order #{{ order.id }} by {{order.user.username}}</h3>
                             <h4 class="text-lg">Order: {{ order.user_order }}</h4>
-                            <p>Pickup: Marrigold</p>
+                            <p>Phone Number: <a href="tel:{{ order.user.profile.phone_number }}">{{ order.user.profile.phone_number }}</a></p>
                             <p>Dropoff: {{ order.location }}</p>
                             <p>Price: <span class="font-bold">&#x20A6</span>{{ order.total_price }}</p>
                             {% if order.payment_method == 'paystack' %}

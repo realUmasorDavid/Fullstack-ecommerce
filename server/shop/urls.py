@@ -25,5 +25,6 @@ urlpatterns = [
     path('rider_admin', views.rider_dashboard, name='order_admin'),
     path('accept_order/<int:order_id>/', views.accept_order, name='accept_order'),
     path('complete_order/<int:order_id>/', views.complete_order, name='complete_order'),
+    # path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('connection-error/', views.connection_error_view, name='connection_error_view'),
 ]
