@@ -127,7 +127,6 @@
                 </form>
                 <div class="flex flex-row space-x-2">
                     <p>or </p>
-                <!-- Continue Shopping Button outside the form -->
                 <button id="continue-shopping-button" class="text-primary">Continue Shopping →</button>
                 </div>
             </div>
@@ -141,7 +140,7 @@
     <div class="messages text-white">
         {% for message in messages %}
         <script>
-            let backgroundColor = "#0000ff"; // Default color
+            let backgroundColor = "#0000ff";
             if ("{{ message.tags }}" === "success") {
                 backgroundColor = "#00ff00";
             } else if ("{{ message.tags }}" === "error") {
@@ -158,10 +157,10 @@
                 text: "{{ message }}",
                 duration: 2000,
                 close: true,
-                gravity: "bottom", // `top` or `bottom`
-                position: "right", // `left`, `center` or `right`
-                backgroundColor: backgroundColor, // Use the variable here
-                stopOnFocus: true, // Prevents dismissing of toast on hover
+                gravity: "bottom",
+                position: "right",
+                backgroundColor: backgroundColor,
+                stopOnFocus: true,
             }).showToast();
         </script>
         {% endfor %}
@@ -204,7 +203,6 @@
             const originalPriceElement = document.getElementById('original-price');
             originalPriceElement.innerText = `Original Price: ₦${totalAmount.toFixed(2)}`;
 
-            // Update total price with an additional 450
             const totalPriceElement = document.getElementById('totalPrice');
             const totalPrice = totalAmount + 450;
             totalPriceElement.innerText = `Total Amount: ₦${totalPrice.toFixed(2)}`;
@@ -230,7 +228,7 @@
         });
 
         window.sendQuantitiesToBackend = function() {
-            console.log('sendQuantitiesToBackend called'); // Debugging log
+            console.log('sendQuantitiesToBackend called');
             const quantities = {};
             document.querySelectorAll('[id^="quantity-"]').forEach(element => {
                 const cartItemId = element.id.split('-')[1];
@@ -248,39 +246,37 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        console.log('Quantities updated successfully'); // Debugging log
-                        return true; // Indicate success
+                        console.log('Quantities updated successfully');
+                        return true; 
                     } else {
-                        console.error('Failed to update quantities'); // Debugging log
+                        console.error('Failed to update quantities');
                         alert('Failed to update quantities');
-                        return false; // Indicate failure
+                        return false;
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error); // Debugging log
+                    console.error('Error:', error); 
                     alert('An error occurred while updating quantities');
-                    return false; // Indicate failure
+                    return false;
                 });
         }
 
         document.getElementById('paymentForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent the form from submitting
+            event.preventDefault();
             const success = await window.sendQuantitiesToBackend();
             if (success) {
-                this.submit(); // Submit the form if the function completes successfully
+                this.submit();
             }
         });
 
-        // Handle continue shopping button click
         document.getElementById('continue-shopping-button').addEventListener('click', async function(event) {
-            event.preventDefault(); // Prevent the default action
+            event.preventDefault(); 
             const success = await window.sendQuantitiesToBackend();
             if (success) {
-                window.location.href = '/store'; // Redirect to the store URL
+                window.location.href = '/store'; 
             }
         });
 
-        // Initial call to update the original price
         updateOriginalPrice();
     });
 </script>

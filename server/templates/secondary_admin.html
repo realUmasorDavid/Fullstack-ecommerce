@@ -39,7 +39,7 @@
         }
     </script>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="font-Poppins bg-gray-100 text-gray-800">
     <!-- Sidebar -->
     <div class="flex flex-col lg:flex-row h-screen">
         
@@ -351,26 +351,6 @@
         </tbody>
     </table>
 </div>
-
-
-            <!-- Reports and Analytics -->
-            {% comment %} <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div class="bg-white p-6 shadow rounded-lg">
-                    <h2 class="text-xl font-semibold mb-4">Reports</h2>
-                    <div class="flex items-center justify-between">
-                        <p>24k Customers</p>
-                        <p>$250k Revenue</p>
-                    </div>
-                    <div class="mt-4">
-                        <img src="https://via.placeholder.com/300x100" alt="Reports Graph">
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 shadow rounded-lg">
-                    <h2 class="text-xl font-semibold mb-4">Customer by Country</h2>
-                    <img src="https://via.placeholder.com/300x100" alt="World Map">
-                </div>
-            </section> {% endcomment %}
         </main>
     </div>
     <script>
@@ -409,7 +389,6 @@
                 .then(data => {
                     if (data.status === 'success') {
                         alert('Order cancelled successfully.');
-                        // Optionally, update the UI to reflect the change
                         location.reload();
                     } else {
                         alert('Error: ' + data.message);

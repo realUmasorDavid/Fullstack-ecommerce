@@ -66,7 +66,6 @@
                         </div>
 
                         <div class="flex space-x-5 items-center">
-                            {% comment %} <a onclick="toggleMenu()" {% endcomment %}
                             <a href="/cart" class="flex items-center hover:text-gray-200 relative cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -276,7 +275,6 @@
                 $('[id^="add-to-cart-form-"]').off('submit').on('submit', function(event) {
                     event.preventDefault();
 
-                    // Log form submission
                     console.log('Form submitted');
 
                     $.ajax({
@@ -287,11 +285,9 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         },
                         success: function(response) {
-                            // Log the response for debugging
                             console.log('Response:', response);
 
                             if (response.success) {
-                                // Show success toast
                                 Toastify({
                                     text: response.message,
                                     duration: 2000,
@@ -302,10 +298,8 @@
                                     stopOnFocus: true,
                                 }).showToast();
 
-                                // Fetch the updated cart data
                                 fetchCartData();
                             } else {
-                                // Show error toast
                                 Toastify({
                                     text: response.message,
                                     duration: 2000,
@@ -318,10 +312,8 @@
                             }
                         },
                         error: function(xhr, status, error) {
-                            // Log the error for debugging
                             console.error('Error:', error);
 
-                            // Show error toast
                             Toastify({
                                 text: 'An error occurred: ' + error,
                                 duration: 2000,
@@ -339,12 +331,10 @@
             function fetchCartData() {
                 $.ajax({
                     type: 'GET',
-                    url: '/get-cart', // Replace with the actual URL to fetch cart data
+                    url: '/get-cart',
                     success: function(cartResponse) {
-                        // Log the cart response for debugging
                         console.log('Cart Response:', cartResponse);
 
-                        // Check if cartResponse.cart is defined and has item_count
                         if (cartResponse.cart && cartResponse.cart.item_count !== undefined) {
                             $('#quantity').text(cartResponse.cart.item_count);
                         } else {
@@ -352,10 +342,8 @@
                         }
                     },
                     error: function(xhr, status, error) {
-                        // Log the error for debugging
                         console.error('Error fetching cart data:', error);
 
-                        // Show error toast
                         Toastify({
                             text: 'An error occurred while fetching cart data: ' + error,
                             duration: 2000,
@@ -369,10 +357,8 @@
                 });
             }
 
-            // Attach event listeners to the initial forms
             attachEventListeners();
 
-            // Initial fetch to display all products except "Pack"
             fetchProducts('');
         });
     </script>

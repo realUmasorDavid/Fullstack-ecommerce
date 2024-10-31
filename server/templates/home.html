@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 
@@ -6,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <title>Marrigold</title>
+    <link rel="icon" type="image/png" href="{% static '/marrigoldblack.png' %}"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -125,9 +127,7 @@
             <div class="text md:ml-8 md:w-1/2">
                 <h4 class="text-md md:text-lg opacity-50">Greetings, cuisine enthusiasts!</h4>
                 <h1 class="text-2xl md:text-5xl font-bold my-2">Take a Quick Flavour Journey Here!</h1>
-                <p class="leading-6 text-sm md:text-base">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit consectetur
-                    sunt atque alias,
-                    distinctio optio sit eveniet cumque excepturi minima?</p>
+                <p class="leading-6 text-sm md:text-base">Experience the vibrant soul of Nigerian cuisine in the heart of Lead City, Ibadan. At Marrigold, we blend traditional flavors with modern sophistication, creating unforgettable West African dining moments.</p>
                 <a href="/store">
                     <button
                     class="px-2 py-1 text-base md:px-4 md:py-2 mt-4 md:text-lg text-white bg-primary border-2 border-primary rounded-full hover:bg-transparent hover:text-primary duration-300">Order
@@ -140,16 +140,14 @@
         </section>
 
         <section class="md:flex my-10 md:my-0 align-middle items-center md:space-x-16 px-10 md:px-4 md:py-16">
-            <div id="slideInLeft" class="left md:w-1/2 md:animate__animated animate__slow">
+            <div id="" class="left md:w-1/2">
                 <img src="https://img.freepik.com/free-vector/cloud-kitchen-concept-illustration_114360-25656.jpg?t=st=1726334102~exp=1726337702~hmac=2957793195b44d2d9b72c77f0f41586a946589c66fc5401ef000afcf7c6cef80&w=740"
                     alt="">
             </div>
-            <div id="slideInRight" class="right md:w-1/2 md:animate__animated animate__slow">
+            <div id="" class="right md:w-1/2">
                 <h4 class="text-md md:text-lg opacity-50">Satisfy cravings - Choose Us!</h4>
                 <h1 class="text-2xl md:text-5xl font-bold my-4">Fast, Flavourful, Unforgettable. Choose Us!</h1>
-                <p class="leading-6">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit consectetur
-                    sunt atque alias,
-                    distinctio optio sit eveniet cumque excepturi minima?</p>
+                <p class="leading-6">Experience the vibrant flavors of Nigeria at Marrigold, a culinary gem in Lead City University, Ibadan. Our expert chefs craft authentic local delicacies and contemporary African dishes using fresh, locally-sourced ingredients to satisfy your cravings for excellence.</p>
                 <button
                     class="px-6 py-2 mt-4 text-lg text-white bg-primary border-2 border-primary rounded-full hover:bg-transparent hover:text-primary duration-300">Read
                     more</button>
@@ -177,13 +175,13 @@
                 </div>
             </div>
         </section>
-        <section class="py-4 md:animate__animated">
-            <section id="slideInUp" class="py-8 text-center md:animate__animated animate__slow">
-                <h1 class="text-xl md:animate__animated">Menu</h1>
-                <h1 class="text-3xl font-bold md:animate__animated">Our Top-Rated Meals</h1>
+        <section class="py-4">
+            <section id="" class="py-8 text-center">
+                <h1 class="text-xl">Menu</h1>
+                <h1 class="text-3xl font-bold">Our Top-Rated Meals</h1>
             </section>
 
-            <section id="slideInLeft" class="grid md:grid-cols-2 lg:grid-cols-3 mx-auto gap-y-6 md:gap-6 px-6 md:px-16 my-8 md:animate__animated animate__slow">
+            <section id="" class="grid md:grid-cols-2 lg:grid-cols-3 mx-auto gap-y-6 md:gap-6 px-6 md:px-16 my-8">
                 <a href="/store">
                     <div class="meals flex items-center align-middle border-2 border-gray-300 px-4 rounded-xl hover:scale-110 hover:bg-green-200 duration-300">
                         <div class="left">
@@ -298,32 +296,6 @@
             document.getElementById('mobile-menu').classList.toggle('translate-x-full');
             document.getElementById('mobile-menu').classList.toggle('translate-x-0');
             document.body.classList.toggle('overflow-hidden');
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        if (entry.target.id === 'slideInUp') {
-                            entry.target.classList.add('animate__slideInUp');
-                        } else if (entry.target.id === 'slideInRight') {
-                            entry.target.classList.add('animate__slideInRight');
-                        } else if (entry.target.id === 'slideInUp') {
-                            entry.target.classList.add('animate__slideInUp');
-                        } else if (entry.target.id === 'slideInLeft') {
-                            entry.target.classList.add('animate__slideInLeft');
-                        }
-                        observer.unobserve(entry.target); // Stop observing once the animation is triggered
-                    }
-                });
-            }, {
-                threshold: 0.1 // Adjust the threshold as needed
-            });
-
-            const animatedElements = document.querySelectorAll('.md:animate__animated');
-            animatedElements.forEach(element => {
-                observer.observe(element);
-            });
         });
     </script>
 </body>
