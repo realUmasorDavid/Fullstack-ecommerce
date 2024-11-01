@@ -52,8 +52,9 @@
         <div class="flex flex-wrap place-items-center font-Poppins bg-primary">
             <section class="relative w-full">
                 <nav class="flex justify-between bg-primary text-white max-w-full">
-                    <div class="px-5 xl:px-12 py-6 flex justify-between md:justify-none w-full items-center">
-                        <a href="/">
+                    <div class="px-4 xl:px-8 py-4 flex justify-between md:justify-none w-full items-center">
+                        <a class="flex align-middle items-center" href="/">
+                            <img src="{% static '/marrigold.png' %}" class="h-10 md:h-14" alt="">
                             <h1 class="text-lg">Marrigold</h1>
                         </a>
                         <div class="hidden md:block max-w-md mx-auto">
@@ -180,7 +181,7 @@
         </button>
     </div>
 
-    <div class="md:hidden relative flex items-center m-4 w-11/12 h-12 px-2 rounded-lg focus-within:shadow-lg bg-white outline-none border-2 border-primary overflow-hidden">
+    <div class="md:hidden relative flex items-center m-4 w-11/12 h-10 px-2 rounded-lg focus-within:shadow-lg bg-white outline-none border-2 border-primary overflow-hidden">
         <div class="grid place-items-center h-full text-gray-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -191,10 +192,10 @@
 
     <!-- Category Filter Buttons -->
     <div class="mt-4 mx-4 md:mx-16 flex space-x-4 scrollable-container">
-        <button class="category-button bg-primary text-white px-4 py-2 focus:ring-inset focus:bg-transparent focus:text-primary ring-primary rounded active" data-category="">All</button>
+        <button class="category-button bg-primary text-white font-medium text-xs md:text-base px-4 py-2 focus:ring-inset focus:bg-transparent focus:text-primary ring-primary rounded active" data-category="">All</button>
         {% for category in categories %}
             {% if category.name != 'Packaging' %}
-                <button class="category-button bg-primary text-white px-4 py-2 focus:ring-inset focus:bg-transparent focus:text-primary ring-primary rounded" data-category="{{ category.name }}">{{ category.name }}</button>
+                <button class="category-button bg-primary text-white font-medium text-xs md:text-base px-4 py-2 focus:ring-inset focus:bg-transparent focus:text-primary ring-primary rounded" data-category="{{ category.name }}">{{ category.name }}</button>
             {% endif %}
         {% endfor %}
     </div>
@@ -210,16 +211,16 @@
                             <div
                                 class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
                                 <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                                    class="h-60 w-full object-cover object-center group-hover:opacity-75">
+                                    class="h-40 md:h-60 w-full object-cover object-center group-hover:opacity-75">
                             </div>
                             <div class="flex align-middle items-center justify-between">
                                 <div class="">
                                     <h3 class="mt-4 text-sm text-gray-700">{{ product.name }}</h3>
-                                    <p class="mt-1 text-lg font-medium text-gray-900"><span class="font-bold">&#x20A6</span> {{ product.price }}</p>
+                                    <p class="mt-1 text-base font-medium text-gray-900"><span class="font-bold">&#x20A6</span> {{ product.price }}</p>
                                 </div>
                                 <form id="add-to-cart-form-{{ product.pk }}" method="post" action="{% url 'add_to_cart' product.pk %}">
                                     {% csrf_token %}
-                                    <button type="submit" class="add-to-cart px-2 py-1.5 text-sm bg-primary text-white h-1/2 mt-4 rounded-lg">Add to Cart</button>
+                                    <button type="submit" class="add-to-cart px-4 py-2 text-xs md:text-base bg-primary text-white h-1/2 mt-4 rounded-lg">Add to Cart</button>
                                 </form>
                             </div>
                         </div>
@@ -290,7 +291,7 @@
                         const productCard = `
                             <div class="group">
                                 <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                                    <img src="${product.image}" alt="${product.name}" class="h-60 w-full object-cover object-center group-hover:opacity-75">
+                                    <img src="${product.image}" alt="${product.name}" class="h-44 md:h-60 w-full object-cover object-center group-hover:opacity-75">
                                 </div>
                                 <div class="flex align-middle items-center justify-between">
                                     <div>
@@ -299,7 +300,7 @@
                                     </div>
                                     <form id="add-to-cart-form-${product.id}" action="/add_to_cart/${product.id}/" method="post" style="display:inline;">
                                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                                        <button type="submit" data-id="${product.id}" class="add-to-cart px-2 py-1.5 text-sm bg-primary text-white h-1/2 mt-4 rounded-lg">Add to Cart</button>
+                                        <button type="submit" data-id="${product.id}" class="add-to-cart px-4 py-2 text-xs md:text-sm bg-primary text-white h-1/2 mt-4 rounded-lg">Add to Cart</button>
                                     </form>
                                 </div>
                             </div>
