@@ -1,6 +1,11 @@
 from django.urls import path
 from . import views
 from .views import UpdateCartQuantitiesView
+from django.conf.urls import handler404, handler500
+
+handler403 = 'shop.views.error_403'
+handler404 = 'shop.views.error_404'
+handler500 = 'shop.views.error_500'
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -29,4 +34,5 @@ urlpatterns = [
     path('complete_order/<int:order_id>/', views.complete_order, name='complete_order'),
     # path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('connection-error/', views.connection_error_view, name='connection_error_view'),
+    path('test-error/', views.test_error),
 ]

@@ -16,7 +16,7 @@ from django.contrib import auth, messages
 from django.conf import settings
 from .models import *
 import json
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from .paystack import initialize_payment, verify_payment
@@ -585,8 +585,11 @@ def error_404(request, exception):
 def error_403(request, *args, **argv):
     return render(request, 'errors/403.html', status=403)
 
-def error_500(request, *args, **argv):
-    return render(request, 'errors/500.html', status=500)
+def error_500(request, exception=None):
+    context = {
+        'exception': str(exception) if exception else "An unknown error occurred."
+    }
+    return HttpResponseServerError(render(request, 'errors/500.html', context))
 
 def connection_error_view(request):
     return render(request, 'errors/connection_error.html', status=503)
@@ -712,3 +715,6 @@ def complete_order(request, order_id):
         return JsonResponse({'status': 'success', 'message': 'Order delivered successfully.'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Order cannot be completed.'}, status=400)
+    
+def test_error(request):
+    raise Exception("This is a test error")
