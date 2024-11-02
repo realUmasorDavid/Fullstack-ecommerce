@@ -16,6 +16,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
+ADMINS = [("David", "davidumasor18@gmail.com")]
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_NAME = 'sessionid'
 SESSION_COOKIE_AGE = 1209600
