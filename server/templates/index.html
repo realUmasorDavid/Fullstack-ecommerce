@@ -128,6 +128,18 @@
         </div>
     </div>
 
+    <div id="loading-spinner" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+        <div class="border-t-4 border-b-4 border-primary h-12 w-12 rounded-full animate-spin"></div>
+    </div>  
+
+    <div id="category-spinner" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+        <div class="border-t-4 border-b-4 border-primary h-12 w-12 rounded-full animate-spin"></div>
+    </div>
+    
+    <div id="search-spinner" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+        <div class="border-t-4 border-b-4 border-primary h-12 w-12 rounded-full animate-spin"></div>
+    </div>
+
     <div id="default-carousel" class="hidden lg:block relative w-full" data-carousel="slide">
         <!-- Carousel wrapper -->
         <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
@@ -234,15 +246,19 @@
             const searchInputs = document.querySelectorAll('input[id^="search-"]');
             const categoryButtons = document.querySelectorAll('.category-button');
             const itemsContainer = document.getElementById('items-container');
-    
+        
             // Event listener for search inputs
             searchInputs.forEach(input => {
                 input.addEventListener('input', function () {
                     const query = this.value;
+                    if (query.length > 0) {
+                        // Show the search spinner
+                        $('#search-spinner').removeClass('hidden');
+                    }
                     fetchProducts(query);
                 });
             });
-    
+        
             // Event listener for category buttons
             categoryButtons.forEach(button => {
                 button.addEventListener('click', function () {
@@ -250,12 +266,14 @@
                     categoryButtons.forEach(btn => btn.classList.remove('active'));
                     // Add active class to the clicked button
                     this.classList.add('active');
-    
+        
                     const category = this.getAttribute('data-category');
+                    // Show the category spinner
+                    $('#category-spinner').removeClass('hidden');
                     fetchProductsByCategory(category);
                 });
             });
-    
+        
             function fetchProducts(query) {
                 fetch(`/search/?query=${query}`, {
                     headers: {
@@ -266,9 +284,26 @@
                 .then(data => {
                     updateItemsContainer(data);
                     attachEventListeners();
+                    // Hide the search spinner
+                    $('#search-spinner').addClass('hidden');
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
+                    // Show error toast
+                    Toastify({
+                        text: 'Unable to load content',
+                        duration: 2000,
+                        close: true,
+                        gravity: "bottom",
+                        position: "right",
+                        backgroundColor: "#ff0000",
+                        stopOnFocus: true,
+                    }).showToast();
+                    // Hide the search spinner
+                    $('#search-spinner').addClass('hidden');
                 });
             }
-    
+        
             function fetchProductsByCategory(category) {
                 fetch(`/store?category=${category}`, {
                     headers: {
@@ -279,9 +314,26 @@
                 .then(data => {
                     updateItemsContainer(data);
                     attachEventListeners();
+                    // Hide the category spinner
+                    $('#category-spinner').addClass('hidden');
+                })
+                .catch(error => {
+                    console.error('Error fetching products by category:', error);
+                    // Show error toast
+                    Toastify({
+                        text: 'Unable to load content',
+                        duration: 2000,
+                        close: true,
+                        gravity: "bottom",
+                        position: "right",
+                        backgroundColor: "#ff0000",
+                        stopOnFocus: true,
+                    }).showToast();
+                    // Hide the category spinner
+                    $('#category-spinner').addClass('hidden');
                 });
             }
-    
+        
             function updateItemsContainer(data) {
                 itemsContainer.innerHTML = '';
                 data.forEach(product => {
@@ -308,25 +360,29 @@
                     }
                 });
             }
-    
+        
             function attachEventListeners() {
                 $('[id^="add-to-cart-form-"]').off('submit').on('submit', function(event) {
                     event.preventDefault();
-    
+        
+                    // Show the loading spinner
+                    $('#loading-spinner').removeClass('hidden');
+        
                     // Log form submission
                     console.log('Form submitted');
-    
+        
                     $.ajax({
                         type: 'POST',
                         url: $(this).attr('action'),
                         data: $(this).serialize(),
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
                         },
                         success: function(response) {
                             // Log the response for debugging
                             console.log('Response:', response);
-    
+        
                             if (response.success) {
                                 // Show success toast
                                 Toastify({
@@ -338,7 +394,7 @@
                                     backgroundColor: "#00ff00",
                                     stopOnFocus: true,
                                 }).showToast();
-    
+        
                                 // Fetch the updated cart data
                                 fetchCartData();
                             } else {
@@ -353,14 +409,17 @@
                                     stopOnFocus: true,
                                 }).showToast();
                             }
+        
+                            // Hide the loading spinner
+                            $('#loading-spinner').addClass('hidden');
                         },
                         error: function(xhr, status, error) {
                             // Log the error for debugging
                             console.error('Error:', error);
-    
+        
                             // Show error toast
                             Toastify({
-                                text: 'An error occurred: ' + error,
+                                text: 'Unable to load content',
                                 duration: 2000,
                                 close: true,
                                 gravity: "bottom",
@@ -368,11 +427,14 @@
                                 backgroundColor: "#ff0000",
                                 stopOnFocus: true,
                             }).showToast();
+        
+                            // Hide the loading spinner
+                            $('#loading-spinner').addClass('hidden');
                         }
                     });
                 });
             }
-    
+        
             function fetchCartData() {
                 $.ajax({
                     type: 'GET',
@@ -380,7 +442,7 @@
                     success: function(cartResponse) {
                         // Log the cart response for debugging
                         console.log('Cart Response:', cartResponse);
-    
+        
                         // Check if cartResponse.cart is defined and has item_count
                         if (cartResponse.cart && cartResponse.cart.item_count !== undefined) {
                             $('#quantity').text(cartResponse.cart.item_count);
@@ -391,10 +453,10 @@
                     error: function(xhr, status, error) {
                         // Log the error for debugging
                         console.error('Error fetching cart data:', error);
-    
+        
                         // Show error toast
                         Toastify({
-                            text: 'An error occurred while fetching cart data: ' + error,
+                            text: 'Unable to load content',
                             duration: 2000,
                             close: true,
                             gravity: "bottom",
@@ -405,13 +467,14 @@
                     }
                 });
             }
-    
+        
             // Attach event listeners to the initial forms
             attachEventListeners();
-    
+        
             // Initial fetch to display all products except "Pack"
             fetchProducts('');
-        });
+        });     
+        
     </script>
     
 
