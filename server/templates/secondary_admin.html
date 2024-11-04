@@ -341,7 +341,7 @@
                 {% for order in incoming_orders %}
                 <tr>
                     <td class="px-4 py-2 text-center">{{ order.id }}</td>
-                    <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.user }}</td>
+                    <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.user }} - <a href="tel:{{ order.user.profile.phone_number }}">{{ order.user.profile.phone_number }}</a></td>
                     <td class="px-4 py-2 text-center">{{ order.user_order }}</td>
                     <td class="px-4 py-2 text-center"><span class="font-bold">&#x20A6</span>{{ order.total_price }}</td>
                     <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.payment_date }}</td>
