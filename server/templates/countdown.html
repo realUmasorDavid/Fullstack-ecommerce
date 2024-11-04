@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marrigold - Coming Soon</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #e78e2a;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color);
+        }
+
+        .text-primary {
+            color: var(--primary-color);
+        }
+
+        .border-primary {
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+    <!-- Main container -->
+    <div class="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-primary text-white text-center space-y-8">
+        <h1 class="text-3xl sm:text-5xl font-bold tracking-wide uppercase">Marrigold Restaurant</h1>
+        <p class="text-lg max-w-xl">We're cooking something special for you! Join us soon as we bring the best culinary experience to Ibadan.</p>
+
+        <!-- Countdown Timer -->
+        <div id="countdown" class="grid grid-cols-2 gap-4 md:grid-cols-4 text-gray-900">
+            <div class="p-4 bg-white rounded-lg shadow-lg text-center">
+                <span id="days" class="text-4xl font-bold text-primary">00</span>
+                <p class="text-sm">Days</p>
+            </div>
+            <div class="p-4 bg-white rounded-lg shadow-lg text-center">
+                <span id="hours" class="text-4xl font-bold text-primary">00</span>
+                <p class="text-sm">Hours</p>
+            </div>
+            <div class="p-4 bg-white rounded-lg shadow-lg text-center">
+                <span id="minutes" class="text-4xl font-bold text-primary">00</span>
+                <p class="text-sm">Minutes</p>
+            </div>
+            <div class="p-4 bg-white rounded-lg shadow-lg text-center">
+                <span id="seconds" class="text-4xl font-bold text-primary">00</span>
+                <p class="text-sm">Seconds</p>
+            </div>
+        </div>
+
+        <!-- Social Media Links -->
+        <div class="flex flex-wrap justify-center space-x-4 text-white">
+            <a href="#" class="text-lg hover:text-gray-300">Twitter</a>
+            <a href="#" class="text-lg hover:text-gray-300">Facebook</a>
+            <a href="#" class="text-lg hover:text-gray-300">Instagram</a>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="text-center">
+            <p class="text-white">For inquiries, contact:</p>
+            <p class="font-semibold">John Doe</p>
+            <p>Phone: (123) 456-7890 | Email: johndoe@example.com</p>
+        </div>
+    </div>
+
+    <!-- Countdown Timer Script -->
+    <script>
+        const countDownDate = new Date("Nov 15, 2024 09:00:00").getTime();
+        const countdownFunction = setInterval(function () {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById("days").innerText = days;
+            document.getElementById("hours").innerText = hours;
+            document.getElementById("minutes").innerText = minutes;
+            document.getElementById("seconds").innerText = seconds;
+            if (distance < 0) {
+                clearInterval(countdownFunction);
+                document.getElementById("countdown").innerHTML = "Welcome to marrigoldkitchen.com!";
+                // Redirect to the main app or show the main content
+                window.location.href = "/main-app"; // Change this to your main app URL
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>

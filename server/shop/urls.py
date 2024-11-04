@@ -35,4 +35,5 @@ urlpatterns = [
     # path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('connection-error/', views.connection_error_view, name='connection_error_view'),
     path('test-error/', views.test_error),
+    path('coming-soon/', views.coming_soon, name='coming_soon'),
 ]

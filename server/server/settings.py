@@ -47,6 +47,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'shop.middleware.ConnectionErrorMiddleware',
+    'shop.middleware.CountdownMiddleware',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True

@@ -718,3 +718,6 @@ def complete_order(request, order_id):
     
 def test_error(request):
     raise Exception("This is a test error")
+
+def coming_soon(request):
+    return render(request, 'countdown.html')
