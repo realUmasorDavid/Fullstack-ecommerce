@@ -17,9 +17,8 @@ class CountdownMiddleware:
 
     def __call__(self, request):
         if datetime.now() < self.countdown_date:
-            if not request.user.is_authenticated:
-                return redirect('coming_soon')
-            elif not request.user.profile.is_staff:
-                return redirect('coming_soon')
+            if not request.user.is_authenticated or not request.user.profile.is_staff:
+                if request.path != reverse('coming_soon'):
+                    return redirect('coming_soon')
         response = self.get_response(request)
         return response
