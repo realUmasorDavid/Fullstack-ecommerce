@@ -322,37 +322,62 @@
             <section class="grid grid-cols-1 gap-6">
                 
 
-                <!-- Incoming Orders -->
-<div class="bg-white w-[19rem] md:w-auto p-6 mt-6 shadow rounded-lg">
+<!-- Incoming Orders -->
+<div class="bg-white w-full md:w-[19rem] lg:w-auto p-6 mt-6 shadow rounded-lg">
     <h2 class="text-xl font-semibold mb-4 text-theme-color">Incoming Orders</h2>
-    <table class="w-full">
-        <thead>
-            <tr>
-                <th class="px-4 py-2 text-center">Order ID</th>
-                <th class="px-4 py-2 text-center">User</th>
-                <th class="px-4 py-2 text-center">User Order</th>
-                <th class="px-4 py-2 text-center">Total Price</th>
-                <th class="px-4 py-2 text-center">Payment Date</th>
-                <th class="px-4 py-2 text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in incoming_orders %}
-            <tr>
-                <td class="px-4 py-2 text-center">{{ order.id }}</td>
-                <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.user }}</td>
-                <td class="px-4 py-2 text-center">{{ order.user_order }}</td>
-                <td class="px-4 py-2 text-center"><span class="font-bold">&#x20A6</span>{{ order.total_price }}</td>
-                <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.payment_date }}</td>
-                <td class="px-4 py-2 text-center">
-                    <button onclick="receiveOrder({{ order.id }})" class="bg-green-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Receive</button>
-                    <button onclick="cancelOrder({{ order.id }})" class="bg-red-500 text-white text-sm font-semibold py-1 px-4 rounded-full ml-2">Cancel</button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 text-center">Order ID</th>
+                    <th class="px-4 py-2 text-center">User</th>
+                    <th class="px-4 py-2 text-center">User Order</th>
+                    <th class="px-4 py-2 text-center">Total Price</th>
+                    <th class="px-4 py-2 text-center">Payment Date</th>
+                    <th class="px-4 py-2 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in incoming_orders %}
+                <tr>
+                    <td class="px-4 py-2 text-center">{{ order.id }}</td>
+                    <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.user }}</td>
+                    <td class="px-4 py-2 text-center">{{ order.user_order }}</td>
+                    <td class="px-4 py-2 text-center"><span class="font-bold">&#x20A6</span>{{ order.total_price }}</td>
+                    <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.payment_date }}</td>
+                    <td class="grid grid-cols-2 mt-10 md:mt-0">
+                        <button onclick="receiveOrder({{ order.id }})" class="hidden md:block bg-green-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Receive</button>
+                        <button onclick="cancelOrder({{ order.id }})" class="hidden md:block bg-red-500 text-white text-sm font-semibold py-1 px-4 rounded-full ml-2">Cancel</button>
+
+                        <button onclick="receiveOrder({{ order.id }})" class="md:hidden text-white px-2 py-2 rounded-full">
+                            <svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary" width="800px" height="800px" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <style>
+                                        .cls-1 {
+                                            fill: #699f4c;
+                                            fill-rule: evenodd;
+                                        }
+                                    </style>
+                                </defs>
+                                <path class="cls-1" d="M800,510a30,30,0,1,1,30-30A30,30,0,0,1,800,510Zm-16.986-23.235a3.484,3.484,0,0,1,0-4.9l1.766-1.756a3.185,3.185,0,0,1,4.574.051l3.12,3.237a1.592,1.592,0,0,0,2.311,0l15.9-16.39a3.187,3.187,0,0,1,4.6-.027L817,468.714a3.482,3.482,0,0,1,0,4.846l-21.109,21.451a3.185,3.185,0,0,1-4.552.03Z" id="check" transform="translate(-770 -450)"/>
+                            </svg>
+                        </button>
+
+                        <button onclick="cancelOrder({{ order.id }})" class="md:hidden text-white px-2 py-2 rounded-full">
+                            <svg class="w-6 h-6 text-white transition duration-75 group-hover:text-primary" fill="#ff0000" width="800px" height="800px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                                <title>cancel</title>
+                                <path d="M16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM21.961 12.209c0.244-0.244 0.244-0.641 0-0.885l-1.328-1.327c-0.244-0.244-0.641-0.244-0.885 0l-3.761 3.761-3.761-3.761c-0.244-0.244-0.641-0.244-0.885 0l-1.328 1.327c-0.244 0.244-0.244 0.641 0 0.885l3.762 3.762-3.762 3.76c-0.244 0.244-0.244 0.641 0 0.885l1.328 1.328c0.244 0.244 0.641 0.244 0.885 0l3.761-3.762 3.761 3.762c0.244 0.244 0.641 0.244 0.885 0l1.328-1.328c0.244-0.244 0.244-0.641 0-0.885l-3.762-3.76 3.762-3.762z"></path>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+
         </main>
     </div>
     <script>
