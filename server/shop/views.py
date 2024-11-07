@@ -352,6 +352,10 @@ def login(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
+        
+        if not user:
+            return render(request, 'login.html', {'error': 'This account does not exist'})
+        
         if user:
             auth.login(request, user)
             return redirect('store')
@@ -370,7 +374,7 @@ def clear_user_cart(user):
     # Clear all cart items
     cart.items.clear()
 
-    # Optionally, delete all CartItem entries for the user's cart
+    # Delete all CartItem entries for the user's cart
     CartItem.objects.filter(user=user).delete()
 
     # Handle the specific case for the 'Pack' product
@@ -383,22 +387,6 @@ def clear_user_cart(user):
 
     # Save the cart (if there are any additional fields that need to be updated)
     cart.save()
-
-# def clear_user_cart(user):
-#     CartItem.objects.filter(user=user).delete()
-
-#     cart = Cart.objects.get(user=user)
-
-#     # Delete all items in the cart
-#     cart.items.through.objects.filter(cart=cart).delete()
-
-#     # Delete the 'Pack' product in the CartItem
-#     try:
-#         pack_product = Product.objects.get(name='Pack')
-#         pack_cart_item = CartItem.objects.filter(product=pack_product, cart=cart)
-#         pack_cart_item.delete()
-#     except Product.DoesNotExist:
-#         pass  # Handle the case where 'Pack' product does not exist
 
 @login_required
 def initialize_payment_view(request):
