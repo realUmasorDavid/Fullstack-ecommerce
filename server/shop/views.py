@@ -353,9 +353,6 @@ def login(request):
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
         
-        if not user:
-            return render(request, 'login.html', {'error': 'This account does not exist'})
-        
         if user:
             auth.login(request, user)
             return redirect('store')
@@ -709,3 +706,6 @@ def test_error(request):
 
 def coming_soon(request):
     return render(request, 'countdown.html')
+
+def about(request):
+    return render(request, 'about.html')

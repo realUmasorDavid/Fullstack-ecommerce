@@ -9,6 +9,7 @@ handler500 = 'shop.views.error_500'
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('about', views.about, name='about'),
     path('store', views.store, name='store'),
     path('search/', views.search_products, name='search_products'),
     path('profile', views.profile, name='update_profile'),
