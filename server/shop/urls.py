@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from .views import UpdateCartQuantitiesView
 from django.conf.urls import handler404, handler500
+from django.contrib.auth import views as auth_views
 
 handler403 = 'shop.views.error_403'
 handler404 = 'shop.views.error_404'
@@ -37,4 +38,8 @@ urlpatterns = [
     path('connection-error/', views.connection_error_view, name='connection_error_view'),
     path('test-error/', views.test_error),
     path('coming-soon/', views.coming_soon, name='coming_soon'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]
