@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marrigold Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{% static '../static/output.css' %}" type="text/css" rel="stylesheet">
     <!-- Include Toastify CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Include Toastify JavaScript -->
@@ -25,21 +25,6 @@
             border-color: var(--theme-color);
         }
     </style>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#e78e2a',
-                        secondary: '#FEFEFF',
-                    },
-                    fontFamily: {
-                        Poppins: ["Poppins", "sans-serif"]
-                    },
-                },
-            },
-        }
-    </script>
 </head>
 <body class="font-Poppins bg-gray-100 text-gray-800">
     <!-- Sidebar -->
@@ -285,18 +270,18 @@
                                 <td class="py-2">{{ product.name }}</td>
                                 <td><span class="font-bold">&#x20A6</span>{{ product.price }}</td>
                                 {% if product.is_available %}
-                                    <td class="hidden md:block"><span class="bg-green-500 bg-opacity-20 text-green-800 text-sm border-2 border-gray-600 px-3 py-1 rounded-full">Available</span></td>
+                                    <td class="hidden md:block md:my-2"><span class="bg-green-500 bg-opacity-20 text-green-800 text-[12px] border-2 border-gray-600 px-3 py-1 rounded-full">Available</span></td>
                                     {% else %}
-                                    <td class="hidden md:block"><span class="bg-red-500 bg-opacity-20 text-red-800 text-sm border-2 border-red-700 px-3 py-1 rounded-full">Not Available</span></td>
+                                    <td class="hidden md:block md:my-2"><span class="bg-red-500 bg-opacity-20 text-red-800 text-[12px] border-2 border-red-700 px-3 py-1 rounded-full">Not Available</span></td>
                                     {% endif %}
                                 <td>
                                     {{ product.sales }}
                                 </td>
                                 <td class="hidden md:block">
                                     {% if product.is_available %}
-                                    <button onclick="toggleAvailability({{ product.id }})" class="w-full bg-red-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Out of Stock?</button>
+                                    <button onclick="toggleAvailability({{ product.id }})" class="w-full bg-red-500 text-white text-sm font-semibold py-1 px-4 cursor-pointer rounded-full">Out of Stock?</button>
                                     {% else %}
-                                    <button onclick="toggleAvailability({{ product.id }})" class="w-full bg-green-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Restock</button>
+                                    <button onclick="toggleAvailability({{ product.id }})" class="w-full bg-green-500 text-white text-sm font-semibold py-1 px-4 cursor-pointer rounded-full">Restock</button>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -346,7 +331,7 @@
                     <td class="px-4 py-2 text-center"><span class="font-bold">&#x20A6</span>{{ order.total_price }}</td>
                     <td class="px-4 py-2 text-center text-gray-500 text-sm">{{ order.payment_date }}</td>
                     <td class="grid grid-cols-2 mt-10 md:mt-0">
-                        <button onclick="receiveOrder({{ order.id }})" class="hidden md:block bg-green-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Receive</button>
+                        <button onclick="receiveOrder({{ order.id }})" class="hidden md:block bg-green-500 text-white text-sm font-semibold py-1 px-4 rounded-full">Accept</button>
                         <button onclick="cancelOrder({{ order.id }})" class="hidden md:block bg-red-500 text-white text-sm font-semibold py-1 px-4 rounded-full ml-2">Cancel</button>
 
                         <button onclick="receiveOrder({{ order.id }})" class="md:hidden text-white px-2 py-2 rounded-full">

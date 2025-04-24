@@ -6,23 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Marrigold Profile</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="{% static '/marrigold.png' %}"/>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#e78e2a',
-                        secondary: '#FEFEFF',
-                    },
-                    fontFamily: {
-                        Poppins: ["Poppins", "sans-serif"]
-                    },
-                },
-            },
-        }
-    </script>
+    <link href="{% static '../static/output.css' %}" type="text/css" rel="stylesheet">
 </head>
 
 <body class="font-Poppins">
@@ -261,7 +246,7 @@
                     </div>
                 </div>
                 <div class="save mt-5">
-                    <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg">Save Profile</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-white cursor-pointer rounded-lg">Save Profile</button>
                 </div>
             </form>
         </div>

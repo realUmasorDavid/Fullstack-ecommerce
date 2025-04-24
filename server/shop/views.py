@@ -1,4 +1,8 @@
 # views.py
+import os
+import json
+import hmac
+import hashlib
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -16,7 +20,7 @@ from django.contrib import auth, messages
 from django.conf import settings
 from .models import *
 import json
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponseServerError
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from .paystack import initialize_payment, verify_payment
@@ -55,7 +59,7 @@ def add_to_cart(request, pk):
         cart.items.add(cart_item)
 
         # Check if the added product is under 'Main Meal' category
-        if product.category.name == 'Main Meals':
+        if product.category.name == 'Main Meal':
             try:
                 pack_product = Product.objects.get(name='Pack')
                 pack_in_cart = CartItem.objects.filter(user=user, product=pack_product).exists()
@@ -90,7 +94,7 @@ def delete_item(request, pk):
 
     # Check if the item being deleted is the 'Pack' product
     if product.name == 'Pack':
-        main_meal_items = CartItem.objects.filter(user=user, product__category__name='Main Meals')
+        main_meal_items = CartItem.objects.filter(user=user, product__category__name='Main Meal')
         if main_meal_items.exists():
             messages.error(request, 'A Pack is required for your order.')
             return redirect('initialize_payment')
@@ -99,8 +103,8 @@ def delete_item(request, pk):
     cart_item.delete()
 
     # Check if the removed product is a 'Main Meal'
-    if product.category.name == 'Main Meals':
-        main_meal_items = CartItem.objects.filter(user=user, product__category__name='Main Meals')
+    if product.category.name == 'Main Meal':
+        main_meal_items = CartItem.objects.filter(user=user, product__category__name='Main Meal')
         if not main_meal_items.exists():
             try:
                 pack_product = Product.objects.get(name='Pack')
@@ -534,6 +538,63 @@ def verify_payment_view(request):
 
     return JsonResponse({'status': 'failed', 'message': 'Payment verification failed'})
 
+@csrf_exempt
+def paystack_webhook(request):
+    # Only accept POST requests for security
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Only POST requests allowed")
+
+    # Get Paystack signature from headers
+    paystack_signature = request.headers.get('x-paystack-signature')
+    if not paystack_signature:
+        return HttpResponseBadRequest("Missing signature")
+
+    # Get the secret key from environment variables (ensure it's in bytes)
+    secret = os.getenv('paystack')
+    if not secret:
+        return HttpResponseBadRequest("Missing secret key")
+
+    # Ensure the secret key is in bytes
+    secret = secret.encode('utf-8')
+
+    # Verify the signature by comparing the generated HMAC with the Paystack signature
+    body = request.body
+    expected_signature = hmac.new(secret, body, hashlib.sha512).hexdigest()
+
+    # Compare the signatures
+    if not hmac.compare_digest(expected_signature, paystack_signature):
+        return HttpResponseBadRequest("Invalid signature")
+
+    # Process the webhook data
+    try:
+        event = json.loads(body)
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON")
+
+    # Handle the 'charge.success' event
+    if event['event'] == 'charge.success':
+        data = event['data']
+        reference = data.get('reference')
+        amount_paid = data.get('amount', 0) // 100  # Convert from kobo to Naira
+
+        # Process payment verification
+        try:
+            payment = Payment.objects.get(reference=reference)
+
+            if payment.status != 'completed':
+                payment.status = 'completed'
+                payment.total_amount = amount_paid  # optional, you can adjust total if needed
+                payment.save()
+
+                # Optional: trigger order fulfillment or notification here
+                print(f"✅ Payment verified for {payment.user.username} | Reference: {reference}")
+
+        except Payment.DoesNotExist:
+            # Handle case when the payment reference doesn't exist in the database
+            print(f"⚠️ Webhook received for unknown reference: {reference}")
+
+    return HttpResponse(status=200)
+
 @login_required
 def payment_success(request):
     print("Order is being created")
@@ -575,9 +636,6 @@ def error_500(request, exception=None):
         'exception': str(exception) if exception else "An unknown error occurred."
     }
     return HttpResponseServerError(render(request, 'errors/500.html', context))
-
-def connection_error_view(request):
-    return render(request, 'errors/connection_error.html', status=503)
 
 @login_required
 def admin_dashboard(request):

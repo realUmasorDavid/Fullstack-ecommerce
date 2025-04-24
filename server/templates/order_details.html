@@ -6,24 +6,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marrigold Order Details</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="icon" type="image/png" href="{% static '/marrigold.png' %}"/>
+    <link href="{% static '../static/output.css' %}" type="text/css" rel="stylesheet">
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#e78e2a',
-                        secondary: '#FEFEFF',
-                    },
-                    fontFamily: {
-                        Poppins: ["Poppins", "sans-serif"]
-                    },
-                },
-            },
-        }
-
         $(document).ready(function() {
             $("input:checkbox").click(function() {
                 return false;

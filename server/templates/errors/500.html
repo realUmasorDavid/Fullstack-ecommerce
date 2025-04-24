@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 
@@ -12,22 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
     <title>Marrigold</title>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#e78e2a',
-                        secondary: '#FFC300',
-                    },
-                    fontFamily: {
-                        Poppins: ["Poppins", "sans-serif"]
-                    },
-                },
-            },
-        }
-    </script>
+    <link href="{% static '../static/output.css' %}" type="text/css" rel="stylesheet">
 </head>
 <body>
     <section class="bg-white h-screen flex items-center justify-center">

@@ -1,14 +1,7 @@
-from django.utils.deprecation import MiddlewareMixin
 from django.shortcuts import redirect
-from requests.exceptions import ConnectionError
 from datetime import datetime
 from django.urls import reverse
-from django.contrib.auth.models import User
 
-class ConnectionErrorMiddleware(MiddlewareMixin):
-    def process_exception(self, request, exception):
-        if isinstance(exception, ConnectionError):
-            return redirect('connection_error_view')
 
 class CountdownMiddleware:
     def __init__(self, get_response):

@@ -5,23 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rider Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="{% static '/marrigold.png' %}"/>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#e78e2a',
-                        secondary: '#FEFEFF',
-                    },
-                    fontFamily: {
-                        Poppins: ["Poppins", "sans-serif"]
-                    },
-                },
-            },
-        }
-    </script>
+    <link href="{% static '../static/output.css' %}" type="text/css" rel="stylesheet">
     <style>
         :root {
             --theme-color: #e78e2a;
@@ -275,12 +260,12 @@
                     <tbody>
                         {% for order in new_orders %}
                         <tr class="border-b">
-                            <td class="py-2">{{ order.id }}</td>
+                            <td class="py-3">{{ order.id }}</td>
                             <td>{{ order.user_order }}</td>
                             <td>{{ order.location }}</td>
                             <td>
                                 {% if profile.is_rider %}
-                                    <button onclick="acceptOrder({{ order.id }})" class="hidden md:block bg-green-500 text-white px-4 py-2 rounded">Accept</button>
+                                    <button onclick="acceptOrder({{ order.id }})" class="hidden md:block bg-green-500 text-white px-4 py-1 rounded">Accept</button>
                                     <button onclick="acceptOrder({{ order.id }})" class="md:hidden text-white px-2 py-2 rounded-full">
                                         <svg class="w-5 h-5 text-white transition duration-75 group-hover:text-primary" width="800px" height="800px" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><defs><style>
                                               .cls-1 {
