@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marrigold - Coming Soon</title>
+    <title>Digicraft - Coming Soon</title>
     <link href="{% static '../static/output.css' %}" type="text/css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css2?family=Poppins&display=swap' rel="stylesheet">
     <style>
         :root {
             --primary-color: #e78e2a;
@@ -29,7 +30,7 @@
 
     <!-- Main container -->
     <div class="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-primary text-white text-center space-y-8">
-        <h1 class="text-3xl sm:text-5xl font-bold tracking-wide uppercase">Marrigold Restaurant</h1>
+        <h1 class="text-3xl sm:text-5xl font-bold tracking-wide uppercase">Digicraft Restaurant</h1>
         <p class="text-lg max-w-xl">We're cooking something special for you! Join us soon as we bring the best culinary experience to Lead City University.</p>
 
         <!-- Countdown Timer -->
@@ -83,7 +84,7 @@
             document.getElementById("seconds").innerText = seconds;
             if (distance < 0) {
                 clearInterval(countdownFunction);
-                document.getElementById("countdown").innerHTML = "Welcome to marrigoldkitchen.com!";
+                document.getElementById("countdown").innerHTML = "Welcome to Digicraft!";
                 // Redirect to the main app or show the main content
                 window.location.href = "/main-app"; // Change this to your main app URL
             }

@@ -1,7 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Tangerine&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
 @import "tailwindcss";
 
 @theme {
-    --color-primary: #e78e2a;
+    --color-primary: #000;
     --color-secondary: #FFC300;
     --font-Poppins: "Poppins", sans-serif;
 }
